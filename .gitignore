@@ -1,0 +1,26 @@
+# Maven target directory
+/target/
+
+# IDE files
+/.idea/
+/*.iml
+*.class
+*.log
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment / credentials
+.env
+*.properties.local
+application.properties
+
+# Generated files
+hs_err_pid*
