@@ -22,4 +22,10 @@ public class CardService {
     public Card getCardById(String id) {
         return cardRepository.findById(id).orElse(null);
     }
+
+    public Card getRandomCardSR() {
+        return cardRepository.getOneCardSR();
+    }
+
+    
 }

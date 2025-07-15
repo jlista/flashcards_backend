@@ -28,6 +28,11 @@ public class HelloController {
         return cardService.getCardById(id);
     }
 
+    @GetMapping("/randomsr")
+    public Card getRandomCardSR() {
+        return cardService.getRandomCardSR();
+    }
+
     @GetMapping("/hello")
     public Message sayHello(@RequestParam(defaultValue = "World") String name) {
         return new Message("Hello, " + name + "!");
