@@ -1,9 +1,12 @@
 package com.flashcards.service;
 
+import com.flashcards.CardHelper;
 import com.flashcards.model.Card;
 import com.flashcards.repository.CardRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -21,14 +24,26 @@ public class CardService {
     }
 
     public Card getCardById(String id) {
+        /**
+         * Given an id string, find and return the card with that id. 
+         */
         return cardRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
     }
 
     public Card getRandomCardSR() {
+        /**
+         * Searches the database for all eligible cards based on streak and mastery level, and chooses one randomly
+         * @return a randomly-selected eligible card
+         */
         return cardRepository.getOneCardSR();
     }
 
     public void updateCardStreak(Card card, Boolean isCorrect) {
+        /**
+         * Updates the streak and mastery level of a card based on whether or not the user answered correctly
+         * @param card the card to update
+         * @param isCorrect whether or not the user answered correctly
+         */
         if (!isCorrect){
             card.setStreak(0);
             card.setMasteryLevel(0);
@@ -43,6 +58,9 @@ public class CardService {
             else {
                 card.setStreak(streak + 1);
             }
+
+            Date now = Date.from(Instant.now());
+            card.setLastCorrect(CardHelper.getIsoDateFormat(now));
         }
         cardRepository.save(card);
     }

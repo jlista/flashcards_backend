@@ -1,11 +1,15 @@
 package com.flashcards.service;
 
+import com.flashcards.CardHelper;
 import com.flashcards.model.Card;
 import com.flashcards.repository.CardRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -57,5 +61,62 @@ class CardServiceTest {
         assertThrows(NoSuchElementException.class, () -> {
             cardService.getCardById("foo");
         });
+    }
+
+    @Test
+    void testUpdateCardStreakIncorrect() {
+
+        String startDate = CardHelper.getIsoDateFormat(
+            Date.from(Instant.now().minus(1, ChronoUnit.DAYS))
+        );
+        Card card = new Card("Hint", "Answer", startDate, 1, 1);
+        card.setId("123");
+
+        when(cardRepository.findById("123")).thenReturn(Optional.of(card));
+
+        Card result = cardService.getCardById("123");
+        cardService.updateCardStreak(card, false);
+
+        assertEquals(0, result.getStreak());
+        assertEquals(0, result.getMasteryLevel());
+        assertEquals(startDate, result.getLastCorrect());
+    }
+
+    @Test
+    void testUpdateCardStreakCorrect() {
+
+        String startDate = CardHelper.getIsoDateFormat(
+            Date.from(Instant.now().minus(1, ChronoUnit.DAYS))
+        );
+        Card card = new Card("Hint", "Answer", startDate, 1, 1);
+        card.setId("123");
+
+        when(cardRepository.findById("123")).thenReturn(Optional.of(card));
+
+        Card result = cardService.getCardById("123");
+        cardService.updateCardStreak(card, true);
+
+        assertEquals(2, result.getStreak());
+        assertEquals(1, result.getMasteryLevel());
+        assertNotEquals(startDate, result.getLastCorrect());
+    }
+
+    @Test
+    void testUpdateCardStreakLevelUp() {
+
+        String startDate = CardHelper.getIsoDateFormat(
+            Date.from(Instant.now().minus(1, ChronoUnit.DAYS))
+        );
+        Card card = new Card("Hint", "Answer", startDate, 1, 4);
+        card.setId("123");
+
+        when(cardRepository.findById("123")).thenReturn(Optional.of(card));
+
+        Card result = cardService.getCardById("123");
+        cardService.updateCardStreak(card, true);
+
+        assertEquals(0, result.getStreak());
+        assertEquals(2, result.getMasteryLevel());
+        assertNotEquals(startDate, result.getLastCorrect());
     }
 }

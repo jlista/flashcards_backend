@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 
+import com.flashcards.CardHelper;
 import com.flashcards.model.Card;
 
 class CardRepositoryCustomImpl implements CardRepositoryCustom {
@@ -18,15 +19,19 @@ class CardRepositoryCustomImpl implements CardRepositoryCustom {
     private MongoTemplate mongoTemplate;
 
     public Card getOneCardSR(){
+        /**
+         * Searches the database for all eligible cards based on streak and mastery level, and chooses one randomly
+         * @return a randomly-selected eligible card
+         */
     
         String outerQueryStr = "{$or: [%s,%s,%s,%s,%s]}";
         String innerQueryStr = "{mastery_level: %d, last_correct: {$lte: %s}}";
 
-        String m0_date = MongoHelper.isoDateFormat(Date.from(Instant.now().minus(0, ChronoUnit.DAYS)));
-        String m1_date = MongoHelper.isoDateFormat(Date.from(Instant.now().minus(1, ChronoUnit.DAYS)));
-        String m2_date = MongoHelper.isoDateFormat(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)));
-        String m3_date = MongoHelper.isoDateFormat(Date.from(Instant.now().minus(5, ChronoUnit.DAYS)));
-        String m4_date = MongoHelper.isoDateFormat(Date.from(Instant.now().minus(10, ChronoUnit.DAYS)));
+        String m0_date = CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(0, ChronoUnit.DAYS)));
+        String m1_date = CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(1, ChronoUnit.DAYS)));
+        String m2_date = CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)));
+        String m3_date = CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(5, ChronoUnit.DAYS)));
+        String m4_date = CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(10, ChronoUnit.DAYS)));
 
         String q0 = String.format(innerQueryStr, 0, m0_date);
         String q1 = String.format(innerQueryStr, 1, m1_date);
