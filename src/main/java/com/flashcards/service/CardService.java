@@ -60,7 +60,7 @@ public class CardService {
             }
 
             Date now = Date.from(Instant.now());
-            card.setLastCorrect(CardHelper.getIsoDateFormat(now));
+            card.setLastCorrect(now);
         }
         cardRepository.save(card);
     }

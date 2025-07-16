@@ -66,9 +66,8 @@ class CardServiceTest {
     @Test
     void testUpdateCardStreakIncorrect() {
 
-        String startDate = CardHelper.getIsoDateFormat(
-            Date.from(Instant.now().minus(1, ChronoUnit.DAYS))
-        );
+        Date startDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+
         Card card = new Card("Hint", "Answer", startDate, 1, 1);
         card.setId("123");
 
@@ -85,9 +84,8 @@ class CardServiceTest {
     @Test
     void testUpdateCardStreakCorrect() {
 
-        String startDate = CardHelper.getIsoDateFormat(
-            Date.from(Instant.now().minus(1, ChronoUnit.DAYS))
-        );
+        Date startDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+
         Card card = new Card("Hint", "Answer", startDate, 1, 1);
         card.setId("123");
 
@@ -98,15 +96,14 @@ class CardServiceTest {
 
         assertEquals(2, result.getStreak());
         assertEquals(1, result.getMasteryLevel());
-        assertNotEquals(startDate, result.getLastCorrect());
+        assertTrue(result.getLastCorrect().compareTo(startDate) > 0);
     }
 
     @Test
     void testUpdateCardStreakLevelUp() {
 
-        String startDate = CardHelper.getIsoDateFormat(
-            Date.from(Instant.now().minus(1, ChronoUnit.DAYS))
-        );
+        Date startDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+
         Card card = new Card("Hint", "Answer", startDate, 1, 4);
         card.setId("123");
 
@@ -117,6 +114,7 @@ class CardServiceTest {
 
         assertEquals(0, result.getStreak());
         assertEquals(2, result.getMasteryLevel());
-        assertNotEquals(startDate, result.getLastCorrect());
+        assertTrue(result.getLastCorrect().compareTo(startDate) > 0);
+
     }
 }
