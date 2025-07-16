@@ -31,4 +31,10 @@ public class CardController {
     public Card getRandomCardSR() {
         return cardService.getRandomCardSR();
     }
+
+    @PutMapping("/{id}")
+    public void answerCard(@PathVariable String id, @RequestBody Boolean isCorrect){
+        Card card = cardService.getCardById(id);
+        cardService.updateCardStreak(card, isCorrect);
+    }
 }

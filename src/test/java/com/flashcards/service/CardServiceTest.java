@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,11 +53,9 @@ class CardServiceTest {
 
     @Test
     void testGetCardByIdNotFound() {
-        when(cardRepository.findById("notfound")).thenReturn(Optional.empty());
 
-        Card result = cardService.getCardById("notfound");
-
-        assertNull(result);
+        assertThrows(NoSuchElementException.class, () -> {
+            cardService.getCardById("foo");
+        });
     }
-
 }

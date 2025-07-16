@@ -1,5 +1,7 @@
 package com.flashcards.model;
 
+import java.sql.Date;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,12 +13,12 @@ public class Card {
     private String hint;
     private String answer;
     private String last_correct;
-    private String mastery_level;
-    private String streak;
+    private int mastery_level;
+    private int streak;
 
     public Card() {}
 
-    public Card(String hint, String answer, String last_correct, String mastery_level, String streak ) {
+    public Card(String hint, String answer, String last_correct, int mastery_level, int streak ) {
         this.hint = hint;
         this.answer = answer;
         this.last_correct = last_correct;
@@ -28,21 +30,21 @@ public class Card {
         this.hint = hint;
         this.answer = answer;
         this.last_correct = null;
-        this.mastery_level = "1";
-        this.streak = "0";
+        this.mastery_level = 1;
+        this.streak = 0;
     }
 
     public String getId() { return id; }
     public String getHint() { return hint; }
     public String getAnswer() { return answer; }
     public String getLastCorrect() { return last_correct; }
-    public String getMasteryLevel() { return mastery_level; }
-    public String getStreak() { return streak; }
+    public int getMasteryLevel() { return mastery_level; }
+    public int getStreak() { return streak; }
 
     public void setId(String id) { this.id = id; }
     public void setHint(String hint) { this.hint = hint; }
     public void setAnswer(String answer) { this.answer = answer; }
     public void setLastCorrect(String last_correct) { this.last_correct = last_correct; }
-    public void setMasteryLevel(String mastery_level) {this.mastery_level = mastery_level; }
-    public void setStreak(String streak) { this.streak = streak; }
+    public void setMasteryLevel(int mastery_level) {this.mastery_level = mastery_level; }
+    public void setStreak(int streak) { this.streak = streak; }
 }
