@@ -64,4 +64,8 @@ public class CardService {
         }
         cardRepository.save(card);
     }
+
+    public List<Card> getAllPossibleCards() {
+        return cardRepository.getAllPossibleCards();
+    }
 }

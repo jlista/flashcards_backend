@@ -22,6 +22,11 @@ public class CardController {
         return cardService.getAllCards();
     }
 
+    @GetMapping("/allPossible")
+    public List<Card> getAllPossibleCards() {
+        return cardService.getAllPossibleCards();
+    }
+
     @GetMapping("/{id}")
     public Card getCardById(@PathVariable String id) {
         return cardService.getCardById(id);
