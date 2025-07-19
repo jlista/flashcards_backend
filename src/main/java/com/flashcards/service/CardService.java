@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class CardService {
@@ -30,7 +31,7 @@ public class CardService {
         return cardRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
     }
 
-    public Card getRandomCardSR() {
+    public Optional<Card> getRandomCardSR() {
         /**
          * Searches the database for all eligible cards based on streak and mastery level, and chooses one randomly
          * @return a randomly-selected eligible card

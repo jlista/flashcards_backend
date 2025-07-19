@@ -4,7 +4,10 @@ import com.flashcards.model.Card;
 import com.flashcards.service.CardService;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,9 +36,16 @@ public class CardController {
     }
 
     @GetMapping("/randomsr")
-    public Card getRandomCardSR() {
-        return cardService.getRandomCardSR();
+    public ResponseEntity<Card> getRandomSR() {
+        Optional<Card> card = cardService.getRandomCardSR();
+        if (card.isPresent()) {
+        return new ResponseEntity<>(card.get(), HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
+    
 
     @PutMapping("/{id}")
     public void answerCard(@PathVariable String id, @RequestBody Boolean isCorrect){

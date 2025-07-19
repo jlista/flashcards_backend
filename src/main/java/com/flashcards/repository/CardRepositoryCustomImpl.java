@@ -2,8 +2,10 @@ package com.flashcards.repository;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,15 +45,19 @@ class CardRepositoryCustomImpl implements CardRepositoryCustom {
     
     }
 
-    public Card getOneCardSR(){
+    @Override
+    public Optional<Card> getOneCardSR(){
         /**
          * Searches the database for all eligible cards based on streak and mastery level, and chooses one randomly
          * @return a randomly-selected eligible card
          */
         List<Card> cardChoices = getAllPossibleCards();
-    
-        Random rand = new Random();
-        return cardChoices.get(rand.nextInt(cardChoices.size()));
+
+        if (cardChoices.size() > 0){
+            Random rand = new Random();
+            return Optional.of(cardChoices.get(rand.nextInt(cardChoices.size())));
+        }
+        return null;
     }
   
 }
