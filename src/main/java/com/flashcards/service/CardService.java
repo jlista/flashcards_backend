@@ -50,16 +50,13 @@ public class CardService {
             card.setMasteryLevel(0);
         }
         else {
-            int streak = card.getStreak();
+            int streak = card.getStreak() + 1;
             int mastery_level = card.getMasteryLevel();
-            if (streak == 4 && mastery_level < 4){
+            if (streak % 5 == 0 && mastery_level < 4){
                 card.setMasteryLevel(mastery_level + 1);
-                card.setStreak(0);
             }
-            else {
-                card.setStreak(streak + 1);
-            }
-
+            card.setStreak(streak);
+            
             Date now = Date.from(Instant.now());
             card.setLastCorrect(now);
         }

@@ -112,7 +112,7 @@ class CardServiceTest {
         Card result = cardService.getCardById("123");
         cardService.updateCardStreak(card, true);
 
-        assertEquals(0, result.getStreak());
+        assertEquals(5, result.getStreak());
         assertEquals(2, result.getMasteryLevel());
         assertTrue(result.getLastCorrect().compareTo(startDate) > 0);
 
