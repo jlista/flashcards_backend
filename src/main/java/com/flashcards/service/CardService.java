@@ -46,7 +46,7 @@ public class CardService {
             Random rand = new Random();
             return Optional.of(cardChoices.get(rand.nextInt(cardChoices.size())));
         }
-        return null;
+        return Optional.empty();
     }
 
     public void updateCardStreak(String id, Boolean isCorrect) {
