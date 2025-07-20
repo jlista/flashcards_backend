@@ -1,7 +1,5 @@
 package com.flashcards.model;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.springframework.data.annotation.Id;
@@ -13,11 +11,20 @@ public class Card {
 
     @Id
     private String id;
+
+    @Field("hint")
     private String hint;
+    
+    @Field("answer")
     private String answer;
+    
     @Field("last_correct")
     private Date last_correct;
+    
+    @Field("mastery_level")
     private int mastery_level;
+    
+    @Field("streak")
     private int streak;
 
     public Card() {}
@@ -34,7 +41,7 @@ public class Card {
         this.hint = hint;
         this.answer = answer;
         this.last_correct = null;
-        this.mastery_level = 1;
+        this.mastery_level = 0;
         this.streak = 0;
     }
 

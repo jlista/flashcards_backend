@@ -1,6 +1,5 @@
 package com.flashcards.service;
 
-import com.flashcards.CardHelper;
 import com.flashcards.model.Card;
 import com.flashcards.repository.CardRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,7 +73,7 @@ class CardServiceTest {
         when(cardRepository.findById("123")).thenReturn(Optional.of(card));
 
         Card result = cardService.getCardById("123");
-        cardService.updateCardStreak(card, false);
+        cardService.updateCardStreak("123", false);
 
         assertEquals(0, result.getStreak());
         assertEquals(0, result.getMasteryLevel());
@@ -92,7 +91,7 @@ class CardServiceTest {
         when(cardRepository.findById("123")).thenReturn(Optional.of(card));
 
         Card result = cardService.getCardById("123");
-        cardService.updateCardStreak(card, true);
+        cardService.updateCardStreak("123", true);
 
         assertEquals(2, result.getStreak());
         assertEquals(1, result.getMasteryLevel());
@@ -110,7 +109,7 @@ class CardServiceTest {
         when(cardRepository.findById("123")).thenReturn(Optional.of(card));
 
         Card result = cardService.getCardById("123");
-        cardService.updateCardStreak(card, true);
+        cardService.updateCardStreak("123", true);
 
         assertEquals(5, result.getStreak());
         assertEquals(2, result.getMasteryLevel());
