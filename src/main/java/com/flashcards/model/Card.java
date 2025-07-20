@@ -6,6 +6,7 @@ import java.util.Date;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "vocab")
 public class Card {
@@ -14,6 +15,7 @@ public class Card {
     private String id;
     private String hint;
     private String answer;
+    @Field("last_correct")
     private Date last_correct;
     private int mastery_level;
     private int streak;

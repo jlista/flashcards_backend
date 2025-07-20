@@ -1,6 +1,5 @@
 package com.flashcards.service;
 
-import com.flashcards.CardHelper;
 import com.flashcards.model.Card;
 import com.flashcards.repository.CardRepository;
 import org.springframework.stereotype.Service;
@@ -10,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class CardService {
@@ -31,12 +31,22 @@ public class CardService {
         return cardRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
     }
 
+    public List<Card> getAllPossibleCards() {
+        return cardRepository.getAllPossibleCards();
+    }
+
     public Optional<Card> getRandomCardSR() {
         /**
          * Searches the database for all eligible cards based on streak and mastery level, and chooses one randomly
          * @return a randomly-selected eligible card
          */
-        return cardRepository.getOneCardSR();
+        List<Card> cardChoices = getAllPossibleCards();
+
+        if (cardChoices.size() > 0){
+            Random rand = new Random();
+            return Optional.of(cardChoices.get(rand.nextInt(cardChoices.size())));
+        }
+        return null;
     }
 
     public void updateCardStreak(Card card, Boolean isCorrect) {
@@ -50,23 +60,16 @@ public class CardService {
             card.setMasteryLevel(0);
         }
         else {
-            int streak = card.getStreak();
+            int streak = card.getStreak() + 1;
             int mastery_level = card.getMasteryLevel();
-            if (streak == 4 && mastery_level < 4){
+            if (streak % 5 == 0 && mastery_level < 4){
                 card.setMasteryLevel(mastery_level + 1);
-                card.setStreak(0);
             }
-            else {
-                card.setStreak(streak + 1);
-            }
-
+            card.setStreak(streak);
+            
             Date now = Date.from(Instant.now());
             card.setLastCorrect(now);
         }
         cardRepository.save(card);
-    }
-
-    public List<Card> getAllPossibleCards() {
-        return cardRepository.getAllPossibleCards();
     }
 }
