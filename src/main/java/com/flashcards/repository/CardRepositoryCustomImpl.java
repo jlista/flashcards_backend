@@ -2,11 +2,8 @@ package com.flashcards.repository;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -22,11 +19,9 @@ class CardRepositoryCustomImpl implements CardRepositoryCustom {
 
     public List<Card> getAllPossibleCards(){
 
-        String outerQueryStr = "{$or: [%s,%s,%s,%s,%s]}";
+        String outerQueryStr = "{$or: [%s,%s,%s,%s,%s,%s]}";
         String innerQueryStr = "{mastery_level: %d}"; 
         String innerQueryStrWithDate = "{mastery_level: %d, last_correct: {$lte: %s}}";
-
-
 
         String m1_date = CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(1, ChronoUnit.DAYS)));
         String m2_date = CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)));
@@ -38,26 +33,10 @@ class CardRepositoryCustomImpl implements CardRepositoryCustom {
         String q2 = String.format(innerQueryStrWithDate, 2, m2_date);
         String q3 = String.format(innerQueryStrWithDate, 3, m3_date);
         String q4 = String.format(innerQueryStrWithDate, 4, m4_date);
+        String q5 = "{last_correct: null}";
 
-        String combinedQuery = String.format(outerQueryStr, q0, q1, q2, q3, q4);
+        String combinedQuery = String.format(outerQueryStr, q0, q1, q2, q3, q4, q5);
         BasicQuery query = new BasicQuery(combinedQuery);
         return mongoTemplate.find(query, Card.class);
-    
     }
-
-    @Override
-    public Optional<Card> getOneCardSR(){
-        /**
-         * Searches the database for all eligible cards based on streak and mastery level, and chooses one randomly
-         * @return a randomly-selected eligible card
-         */
-        List<Card> cardChoices = getAllPossibleCards();
-
-        if (cardChoices.size() > 0){
-            Random rand = new Random();
-            return Optional.of(cardChoices.get(rand.nextInt(cardChoices.size())));
-        }
-        return null;
-    }
-  
 }

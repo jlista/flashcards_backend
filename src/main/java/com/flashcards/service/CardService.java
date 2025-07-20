@@ -1,6 +1,5 @@
 package com.flashcards.service;
 
-import com.flashcards.CardHelper;
 import com.flashcards.model.Card;
 import com.flashcards.repository.CardRepository;
 import org.springframework.stereotype.Service;
@@ -10,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class CardService {
@@ -31,12 +31,22 @@ public class CardService {
         return cardRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
     }
 
+    public List<Card> getAllPossibleCards() {
+        return cardRepository.getAllPossibleCards();
+    }
+
     public Optional<Card> getRandomCardSR() {
         /**
          * Searches the database for all eligible cards based on streak and mastery level, and chooses one randomly
          * @return a randomly-selected eligible card
          */
-        return cardRepository.getOneCardSR();
+        List<Card> cardChoices = getAllPossibleCards();
+
+        if (cardChoices.size() > 0){
+            Random rand = new Random();
+            return Optional.of(cardChoices.get(rand.nextInt(cardChoices.size())));
+        }
+        return null;
     }
 
     public void updateCardStreak(Card card, Boolean isCorrect) {
@@ -61,9 +71,5 @@ public class CardService {
             card.setLastCorrect(now);
         }
         cardRepository.save(card);
-    }
-
-    public List<Card> getAllPossibleCards() {
-        return cardRepository.getAllPossibleCards();
     }
 }
