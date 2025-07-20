@@ -49,12 +49,14 @@ public class CardService {
         return null;
     }
 
-    public void updateCardStreak(Card card, Boolean isCorrect) {
+    public void updateCardStreak(String id, Boolean isCorrect) {
         /**
          * Updates the streak and mastery level of a card based on whether or not the user answered correctly
          * @param card the card to update
          * @param isCorrect whether or not the user answered correctly
          */
+        Card card = getCardById(id);
+
         if (!isCorrect){
             card.setStreak(0);
             card.setMasteryLevel(0);
@@ -70,6 +72,31 @@ public class CardService {
             Date now = Date.from(Instant.now());
             card.setLastCorrect(now);
         }
+        cardRepository.save(card);
+    }
+
+    public Card createCard(String hint, String answer){
+        Card card = new Card(hint, answer);
+        return cardRepository.insert(card);
+    }
+
+    public Card updateCard(String id, String hint, String answer){
+        Card card = getCardById(id);
+        card.setHint(hint);
+        card.setAnswer(answer);
+        return cardRepository.save(card);
+    }
+
+    public void deleteCard(String id){
+        Card card = getCardById(id);
+        cardRepository.delete(card);
+    }
+
+    public void resetCard(String id){
+        Card card = getCardById(id);
+        card.setLastCorrect(null);
+        card.setMasteryLevel(0);
+        card.setStreak(0);
         cardRepository.save(card);
     }
 }
