@@ -58,4 +58,14 @@ public class Card {
     public void setLastCorrect(Date last_correct) { this.last_correct = last_correct; }
     public void setMasteryLevel(int mastery_level) {this.mastery_level = mastery_level; }
     public void setStreak(int streak) { this.streak = streak; }
+
+    @Override
+    public String toString(){
+        String dateStr = "";
+        if (this.last_correct != null){
+            dateStr = last_correct.toString();
+        }
+        return String.format("id: %1$s, hint: %2$s, answer: %3$s, lastCorrect: %4$s, mastery: %5$d, streak: %6$d", 
+            this.id, this.hint, this.answer, dateStr, this.mastery_level, this.streak);
+    }
 }
