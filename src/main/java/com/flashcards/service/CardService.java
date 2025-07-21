@@ -2,6 +2,9 @@ package com.flashcards.service;
 
 import com.flashcards.model.Card;
 import com.flashcards.repository.CardRepository;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -13,6 +16,8 @@ import java.util.Random;
 
 @Service
 public class CardService {
+    
+    final static Logger logger = LoggerFactory.getLogger(CardService.class);
 
     private final CardRepository cardRepository;
 
@@ -77,18 +82,23 @@ public class CardService {
 
     public Card createCard(String hint, String answer){
         Card card = new Card(hint, answer);
-        return cardRepository.insert(card);
+        Card res = cardRepository.insert(card);
+        logger.info("Created card: " + res.toString());
+        return res;
     }
 
     public Card updateCard(String id, String hint, String answer){
         Card card = getCardById(id);
         card.setHint(hint);
         card.setAnswer(answer);
-        return cardRepository.save(card);
+        Card res = cardRepository.save(card);
+        logger.info("Updated card: " + res.toString());
+        return res;
     }
 
     public void deleteCard(String id){
         Card card = getCardById(id);
+        logger.info("Deleted card: " + card.toString());
         cardRepository.delete(card);
     }
 
