@@ -63,11 +63,34 @@ class CardServiceTest {
     }
 
     @Test
+    void testGetRandomCards() {
+        Date daysAgo0 = Date.from(Instant.now().minus(0, ChronoUnit.DAYS));
+        Date daysAgo1 = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+
+        Card card1 = new Card("Hint1", "Answer1", daysAgo0, 0, 1);
+        card1.setId("000");
+        Card card2 = new Card("Hint2", "Answer2", daysAgo1, 1, 5);
+        card1.setId("001");
+
+        List<Card> mockCards = Arrays.asList(
+            card1, card2
+        );
+
+        when(cardRepository.getAllPossibleCards()).thenReturn(mockCards);
+        when(cardRepository.findById("000")).thenReturn(Optional.of(card1));
+        when(cardRepository.findById("001")).thenReturn(Optional.of(card2));
+
+        // Assuming we just answered card 000, the only valid choice is 001 since 000 would be twice in a row
+        Optional<Card> firstCardSelected = cardService.getRandomCardSR("000");
+        assertEquals(firstCardSelected.get().getId(), "001");
+    }
+
+    @Test
     void testUpdateCardStreakIncorrect() {
 
         Date startDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
-        Card card = new Card("Hint", "Answer", startDate, 1, 1);
+        Card card = new Card("Hint", "Answer", startDate, 2, 1);
         card.setId("123");
 
         when(cardRepository.findById("123")).thenReturn(Optional.of(card));
@@ -76,7 +99,7 @@ class CardServiceTest {
         cardService.updateCardStreak("123", false);
 
         assertEquals(0, result.getStreak());
-        assertEquals(0, result.getMasteryLevel());
+        assertEquals(1, result.getMasteryLevel());
         assertEquals(startDate, result.getLastCorrect());
     }
 

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -40,18 +41,68 @@ public class CardService {
         return cardRepository.getAllPossibleCards();
     }
 
+    public List<Card> getBalancedPossibleCards() {
+      List<Card> cardChoices = getAllPossibleCards();
+
+        List<Card> balancedCardChoices = new ArrayList<Card>();
+
+        for (int i = 0; i < cardChoices.size(); i++){
+            Card card = cardChoices.get(i);
+            if (card.getMasteryLevel() > 0) {
+                balancedCardChoices.add(card);
+            }
+            else {
+                int priority = 5 - card.getStreak();
+                for (int j = 0; j < priority; j++) {
+                    balancedCardChoices.add(card);
+                }
+            }
+        }
+        return balancedCardChoices;
+    }
+
     public Optional<Card> getRandomCardSR() {
         /**
          * Searches the database for all eligible cards based on streak and mastery level, and chooses one randomly
          * @return a randomly-selected eligible card
          */
-        List<Card> cardChoices = getAllPossibleCards();
+        
+        List<Card> balancedCardChoices = getBalancedPossibleCards();
 
-        if (cardChoices.size() > 0){
+        if (balancedCardChoices.size() > 0){
             Random rand = new Random();
-            return Optional.of(cardChoices.get(rand.nextInt(cardChoices.size())));
+            return Optional.of(balancedCardChoices.get(rand.nextInt(balancedCardChoices.size())));
         }
         return Optional.empty();
+    }
+
+    public Optional<Card> getRandomCardSR(String lastCorrect) {
+        /**
+         * Searches the database for all eligible cards based on streak and mastery level, and chooses one randomly.
+         * Does not choose the most recently seen card unless that is the only choice.
+         * 
+         * @param lastCorrect the ID of the most recently seen card 
+         * @return a randomly-selected eligible card
+         */
+        List<Card> balancedCardChoices = getBalancedPossibleCards();
+        
+        if (balancedCardChoices.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // if the only choice is to show the previous card again, then show it
+        if (!balancedCardChoices.stream().anyMatch(item -> !item.getId().equals(lastCorrect))) {
+            return Optional.of(balancedCardChoices.get(0));
+        }
+
+        // otherwise, look for a choice that does not match the previous
+        Random rand = new Random();
+        Card card;
+        do {
+            card = balancedCardChoices.get(rand.nextInt(balancedCardChoices.size()));
+
+        } while (card.getId().equals(lastCorrect));
+        return Optional.of(card);
     }
 
     public void updateCardStreak(String id, Boolean isCorrect) {
@@ -61,14 +112,14 @@ public class CardService {
          * @param isCorrect whether or not the user answered correctly
          */
         Card card = getCardById(id);
-
+        int mastery_level = card.getMasteryLevel();
+        
         if (!isCorrect){
             card.setStreak(0);
-            card.setMasteryLevel(0);
+            card.setMasteryLevel(Math.max(mastery_level-1, 0));
         }
         else {
             int streak = card.getStreak() + 1;
-            int mastery_level = card.getMasteryLevel();
             if (streak % 5 == 0 && mastery_level < 4){
                 card.setMasteryLevel(mastery_level + 1);
             }

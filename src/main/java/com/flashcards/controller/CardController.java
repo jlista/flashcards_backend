@@ -55,10 +55,18 @@ public class CardController {
     }
 
     @GetMapping("/randomsr")
-    public ResponseEntity<Card> getRandomSR() {
-        Optional<Card> card = cardService.getRandomCardSR();
+    public ResponseEntity<Card> getRandomSR(@RequestParam Optional<String> lastAnswered) {
+
+        Optional<Card> card;
+        if (lastAnswered.isPresent()) {
+            card = cardService.getRandomCardSR(lastAnswered.get());
+        }
+        else {
+            card = cardService.getRandomCardSR();
+        }
+        
         if (card.isPresent()) {
-        return new ResponseEntity<>(card.get(), HttpStatus.OK);
+            return new ResponseEntity<>(card.get(), HttpStatus.OK);
         }
         else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
