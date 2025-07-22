@@ -61,14 +61,14 @@ public class CardService {
          * @param isCorrect whether or not the user answered correctly
          */
         Card card = getCardById(id);
-
+        int mastery_level = card.getMasteryLevel();
+        
         if (!isCorrect){
             card.setStreak(0);
-            card.setMasteryLevel(0);
+            card.setMasteryLevel(Math.max(mastery_level-1, 0));
         }
         else {
             int streak = card.getStreak() + 1;
-            int mastery_level = card.getMasteryLevel();
             if (streak % 5 == 0 && mastery_level < 4){
                 card.setMasteryLevel(mastery_level + 1);
             }

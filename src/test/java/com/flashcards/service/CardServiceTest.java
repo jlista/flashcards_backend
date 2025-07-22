@@ -67,7 +67,7 @@ class CardServiceTest {
 
         Date startDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
-        Card card = new Card("Hint", "Answer", startDate, 1, 1);
+        Card card = new Card("Hint", "Answer", startDate, 2, 1);
         card.setId("123");
 
         when(cardRepository.findById("123")).thenReturn(Optional.of(card));
@@ -76,7 +76,7 @@ class CardServiceTest {
         cardService.updateCardStreak("123", false);
 
         assertEquals(0, result.getStreak());
-        assertEquals(0, result.getMasteryLevel());
+        assertEquals(1, result.getMasteryLevel());
         assertEquals(startDate, result.getLastCorrect());
     }
 
