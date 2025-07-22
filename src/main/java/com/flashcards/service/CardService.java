@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -47,9 +48,24 @@ public class CardService {
          */
         List<Card> cardChoices = getAllPossibleCards();
 
-        if (cardChoices.size() > 0){
+        List<Card> balancedCardChoices = new ArrayList<Card>();
+
+        for (int i = 0; i < cardChoices.size(); i++){
+            Card card = cardChoices.get(i);
+            if (card.getMasteryLevel() > 0) {
+                balancedCardChoices.add(card);
+            }
+            else {
+                int priority = 5 - card.getStreak();
+                for (int j = 0; j < priority; j++) {
+                    balancedCardChoices.add(card);
+                }
+            }
+        }
+
+        if (balancedCardChoices.size() > 0){
             Random rand = new Random();
-            return Optional.of(cardChoices.get(rand.nextInt(cardChoices.size())));
+            return Optional.of(balancedCardChoices.get(rand.nextInt(balancedCardChoices.size())));
         }
         return Optional.empty();
     }
