@@ -17,16 +17,20 @@ class CardRepositoryCustomImpl implements CardRepositoryCustom {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    public List<Card> getAllPossibleCards(){
+    public List<Card> getAllPossibleCards() {
 
         String outerQueryStr = "{$or: [%s,%s,%s,%s,%s,%s]}";
-        String innerQueryStr = "{mastery_level: %d}"; 
+        String innerQueryStr = "{mastery_level: %d}";
         String innerQueryStrWithDate = "{mastery_level: %d, last_correct: {$lte: %s}}";
 
-        String m1_date = CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(1, ChronoUnit.DAYS)));
-        String m2_date = CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)));
-        String m3_date = CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(5, ChronoUnit.DAYS)));
-        String m4_date = CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(10, ChronoUnit.DAYS)));
+        String m1_date =
+                CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(1, ChronoUnit.DAYS)));
+        String m2_date =
+                CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)));
+        String m3_date =
+                CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(5, ChronoUnit.DAYS)));
+        String m4_date =
+                CardHelper.getIsoDateFormat(Date.from(Instant.now().minus(10, ChronoUnit.DAYS)));
 
         String q0 = String.format(innerQueryStr, 0);
         String q1 = String.format(innerQueryStrWithDate, 1, m1_date);

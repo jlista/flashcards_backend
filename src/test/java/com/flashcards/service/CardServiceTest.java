@@ -29,9 +29,7 @@ class CardServiceTest {
 
     @Test
     void testGetAllCards() {
-        List<Card> mockCards = Arrays.asList(
-            new Card("Front", "Back")
-        );
+        List<Card> mockCards = Arrays.asList(new Card("Front", "Back"));
 
         when(cardRepository.findAll()).thenReturn(mockCards);
 
@@ -72,15 +70,14 @@ class CardServiceTest {
         Card card2 = new Card("Hint2", "Answer2", daysAgo1, 1, 5);
         card1.setId("001");
 
-        List<Card> mockCards = Arrays.asList(
-            card1, card2
-        );
+        List<Card> mockCards = Arrays.asList(card1, card2);
 
         when(cardRepository.getAllPossibleCards()).thenReturn(mockCards);
         when(cardRepository.findById("000")).thenReturn(Optional.of(card1));
         when(cardRepository.findById("001")).thenReturn(Optional.of(card2));
 
-        // Assuming we just answered card 000, the only valid choice is 001 since 000 would be twice in a row
+        // Assuming we just answered card 000, the only valid choice is 001 since 000 would be twice
+        // in a row
         Optional<Card> firstCardSelected = cardService.getRandomCardSR("000");
         assertEquals(firstCardSelected.get().getId(), "001");
     }

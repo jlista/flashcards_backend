@@ -11,9 +11,19 @@ public class CardRequestBody implements Serializable {
         this.answer = answer;
     }
 
-    public String getHint() { return this.hint; }
-    public String getAnswer() { return this.answer; }
+    public String getHint() {
+        return this.hint;
+    }
 
-    public void setHint(String hint) { this.hint = hint; }
-    public void setAnswer(String answer) { this.answer = answer; }
+    public String getAnswer() {
+        return this.answer;
+    }
+
+    public void setHint(String hint) {
+        this.hint = hint;
+    }
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
 }
