@@ -2,6 +2,7 @@ package com.flashcards.model;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.springframework.data.annotation.Id;
@@ -116,6 +117,10 @@ public class Card {
                 this.id, this.hint, this.answer, dateStr, this.mastery_level, this.streak);
     }
 
+    private static Date dateToUTC(Date date){
+        return new Date(date.getTime() - Calendar.getInstance().getTimeZone().getOffset(date.getTime()));
+    }
+
     private boolean checkIsReadyToReview() {
 
         if (getMasteryLevel() == 0) {
@@ -139,6 +144,6 @@ public class Card {
         }
 
         Date targetDate = Date.from(Instant.now().minus(targetDays, ChronoUnit.DAYS));
-        return getLastCorrect().compareTo(targetDate) <= 0;
+        return getLastCorrect().compareTo(dateToUTC(targetDate)) <= 0;
     }
 }

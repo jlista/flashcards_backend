@@ -36,6 +36,15 @@ public class CardService {
         List<Card> notReadyCards =
                 allCards.stream().filter(c -> !c.getIsReadyToReview()).collect(Collectors.toList());
         readyCards.addAll(notReadyCards);
+
+        Date now = Date.from(Instant.now().minus(0, ChronoUnit.DAYS));
+
+        for (int i = 0; i < readyCards.size(); i++){
+            Card c = readyCards.get(i);
+            if (c.getLastCorrect() != null) {
+            logger.info(c.getHint() + ": " + c.getLastCorrect().toString() + " vs. " + now.toString());
+            }
+        }
         return readyCards;
     }
 
