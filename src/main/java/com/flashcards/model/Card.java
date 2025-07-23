@@ -1,5 +1,7 @@
 package com.flashcards.model;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import org.springframework.data.annotation.Id;
@@ -26,6 +28,8 @@ public class Card {
 
     @Field("streak")
     private int streak;
+
+    private boolean isReadyToReview;
 
     public Card() {}
 
@@ -69,6 +73,10 @@ public class Card {
         return streak;
     }
 
+    public boolean getIsReadyToReview() {
+        return checkIsReadyToReview();
+    }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -93,6 +101,10 @@ public class Card {
         this.streak = streak;
     }
 
+    public void setIsReadyToReview(boolean isReadyToReview) {
+        this.isReadyToReview = isReadyToReview;
+    }
+
     @Override
     public String toString() {
         String dateStr = "";
@@ -102,5 +114,31 @@ public class Card {
         return String.format(
                 "id: %1$s, hint: %2$s, answer: %3$s, lastCorrect: %4$s, mastery: %5$d, streak: %6$d",
                 this.id, this.hint, this.answer, dateStr, this.mastery_level, this.streak);
+    }
+
+    private boolean checkIsReadyToReview() {
+
+        if (getMasteryLevel() == 0) {
+            return true;
+        }
+
+        int targetDays;
+        switch (getMasteryLevel()) {
+            case 1:
+                targetDays = 1;
+                break;
+            case 2:
+                targetDays = 2;
+                break;
+            case 3:
+                targetDays = 5;
+                break;
+            default:
+                targetDays = 10;
+                break;
+        }
+
+        Date targetDate = Date.from(Instant.now().minus(targetDays, ChronoUnit.DAYS));
+        return getLastCorrect().compareTo(targetDate) <= 0;
     }
 }
