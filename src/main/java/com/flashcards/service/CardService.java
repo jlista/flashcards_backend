@@ -8,9 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -37,14 +35,6 @@ public class CardService {
                 allCards.stream().filter(c -> !c.getIsReadyToReview()).collect(Collectors.toList());
         readyCards.addAll(notReadyCards);
 
-        Date now = Date.from(Instant.now().minus(0, ChronoUnit.DAYS));
-
-        for (int i = 0; i < readyCards.size(); i++){
-            Card c = readyCards.get(i);
-            if (c.getLastCorrect() != null) {
-            logger.info(c.getHint() + ": " + c.getLastCorrect().toString() + " vs. " + now.toString());
-            }
-        }
         return readyCards;
     }
 
@@ -145,7 +135,6 @@ public class CardService {
                 card.setMasteryLevel(mastery_level + 1);
             }
             card.setStreak(streak);
-
             Date now = Date.from(Instant.now());
             card.setLastCorrect(now);
         }
