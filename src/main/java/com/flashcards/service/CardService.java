@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 public class CardService {
@@ -27,7 +28,14 @@ public class CardService {
     }
 
     public List<Card> getAllCards() {
-        return cardRepository.findAll();
+        List<Card> allCards = cardRepository.findAll();
+        List<Card> readyCards =
+                allCards.stream().filter(c -> c.getIsReadyToReview()).collect(Collectors.toList());
+        List<Card> notReadyCards =
+                allCards.stream().filter(c -> !c.getIsReadyToReview()).collect(Collectors.toList());
+        readyCards.addAll(notReadyCards);
+
+        return readyCards;
     }
 
     public Card getCardById(String id) {
@@ -38,7 +46,7 @@ public class CardService {
     }
 
     public List<Card> getAllPossibleCards() {
-        return cardRepository.getAllPossibleCards();
+        return getAllCards().stream().filter(card -> card.getIsReadyToReview()).toList();
     }
 
     public List<Card> getBalancedPossibleCards() {
@@ -127,7 +135,6 @@ public class CardService {
                 card.setMasteryLevel(mastery_level + 1);
             }
             card.setStreak(streak);
-
             Date now = Date.from(Instant.now());
             card.setLastCorrect(now);
         }

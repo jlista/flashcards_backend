@@ -68,11 +68,11 @@ class CardServiceTest {
         Card card1 = new Card("Hint1", "Answer1", daysAgo0, 0, 1);
         card1.setId("000");
         Card card2 = new Card("Hint2", "Answer2", daysAgo1, 1, 5);
-        card1.setId("001");
+        card2.setId("001");
 
         List<Card> mockCards = Arrays.asList(card1, card2);
 
-        when(cardRepository.getAllPossibleCards()).thenReturn(mockCards);
+        when(cardRepository.findAll()).thenReturn(mockCards);
         when(cardRepository.findById("000")).thenReturn(Optional.of(card1));
         when(cardRepository.findById("001")).thenReturn(Optional.of(card2));
 
@@ -134,6 +134,22 @@ class CardServiceTest {
         assertEquals(5, result.getStreak());
         assertEquals(2, result.getMasteryLevel());
         assertTrue(result.getLastCorrect().compareTo(startDate) > 0);
+    }
+
+    @Test
+    void testIsCardReady() {
+        Date today = Date.from(Instant.now().minus(0, ChronoUnit.DAYS));
+        Date yesterday = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+
+        Card card1 = new Card("hint", "answer", today, 0, 0);
+        Card card2 = new Card("hint", "answer", today, 1, 5);
+        Card card3 = new Card("hint", "answer", yesterday, 0, 0);
+        Card card4 = new Card("hint", "answer", yesterday, 1, 5);
+
+        assertEquals(true, card1.getIsReadyToReview());
+        assertEquals(false, card2.getIsReadyToReview());
+        assertEquals(true, card3.getIsReadyToReview());
+        assertEquals(true, card4.getIsReadyToReview());
 
     }
 }
