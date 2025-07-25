@@ -4,31 +4,26 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
-@Document(collection = "vocab")
+@Entity
+@Table(name = "vocab")
 public class Card {
 
-    @Id
-    private String id;
-
-    @Field("hint")
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
     private String hint;
-
-    @Field("answer")
     private String answer;
-
-    @Field("last_correct")
     private Date last_correct;
-
-    @Field("mastery_level")
     private int mastery_level;
-
-    @Field("streak")
     private int streak;
-
+    @Transient
     private boolean isReadyToReview;
 
     public Card() {}
@@ -49,7 +44,7 @@ public class Card {
         this.streak = 0;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
@@ -77,7 +72,7 @@ public class Card {
         return checkIsReadyToReview();
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

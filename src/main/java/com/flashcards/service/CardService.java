@@ -38,7 +38,7 @@ public class CardService {
         return readyCards;
     }
 
-    public Card getCardById(String id) {
+    public Card getCardById(Long id) {
         /**
          * Given an id string, find and return the card with that id.
          */
@@ -85,7 +85,7 @@ public class CardService {
         return Optional.empty();
     }
 
-    public Optional<Card> getRandomCardSR(String lastCorrect) {
+    public Optional<Card> getRandomCardSR(Long lastCorrect) {
         /**
          * Searches the database for all eligible cards based on streak and mastery level, and
          * chooses one randomly. Does not choose the most recently seen card unless that is the only
@@ -115,7 +115,7 @@ public class CardService {
         return Optional.of(card);
     }
 
-    public void updateCardStreak(String id, Boolean isCorrect) {
+    public void updateCardStreak(Long id, Boolean isCorrect) {
         /**
          * Updates the streak and mastery level of a card based on whether or not the user answered
          * correctly
@@ -143,12 +143,12 @@ public class CardService {
 
     public Card createCard(String hint, String answer) {
         Card card = new Card(hint, answer);
-        Card res = cardRepository.insert(card);
+        Card res = cardRepository.save(card);
         logger.info("Created card: " + res.toString());
         return res;
     }
 
-    public Card updateCard(String id, String hint, String answer) {
+    public Card updateCard(Long id, String hint, String answer) {
         Card card = getCardById(id);
         card.setHint(hint);
         card.setAnswer(answer);
@@ -157,13 +157,13 @@ public class CardService {
         return res;
     }
 
-    public void deleteCard(String id) {
+    public void deleteCard(Long id) {
         Card card = getCardById(id);
         logger.info("Deleted card: " + card.toString());
         cardRepository.delete(card);
     }
 
-    public void resetCard(String id) {
+    public void resetCard(Long id) {
         Card card = getCardById(id);
         card.setLastCorrect(null);
         card.setMasteryLevel(0);

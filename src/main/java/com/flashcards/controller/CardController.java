@@ -26,7 +26,7 @@ public class CardController {
     }
 
     @GetMapping("/{id}")
-    public Card getCardById(@PathVariable String id) {
+    public Card getCardById(@PathVariable Long id) {
         return cardService.getCardById(id);
     }
 
@@ -38,14 +38,14 @@ public class CardController {
     }
 
     @PutMapping("/{id}")
-    public Card updateCard(@PathVariable String id, @RequestBody CardRequestBody cardRequestBody) {
+    public Card updateCard(@PathVariable Long id, @RequestBody CardRequestBody cardRequestBody) {
         String hint = cardRequestBody.getHint();
         String answer = cardRequestBody.getAnswer();
         return cardService.updateCard(id, hint, answer);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteCard(@PathVariable String id) {
+    public void deleteCard(@PathVariable Long id) {
         cardService.deleteCard(id);
     }
 
@@ -55,7 +55,7 @@ public class CardController {
     }
 
     @GetMapping("/randomsr")
-    public ResponseEntity<Card> getRandomSR(@RequestParam Optional<String> lastAnswered) {
+    public ResponseEntity<Card> getRandomSR(@RequestParam Optional<Long> lastAnswered) {
 
         Optional<Card> card;
         if (lastAnswered.isPresent()) {
@@ -72,12 +72,12 @@ public class CardController {
     }
 
     @PutMapping("/answer")
-    public void answerCard(@RequestParam String id, @RequestBody Boolean isCorrect) {
+    public void answerCard(@RequestParam Long id, @RequestBody Boolean isCorrect) {
         cardService.updateCardStreak(id, isCorrect);
     }
 
     @PutMapping("/reset")
-    public void resetCard(@RequestParam String id) {
+    public void resetCard(@RequestParam Long id) {
         cardService.resetCard(id);
     }
 }

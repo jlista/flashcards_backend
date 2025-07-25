@@ -42,11 +42,11 @@ class CardServiceTest {
     @Test
     void testGetCardByIdFound() {
         Card card = new Card("Front", "Back");
-        card.setId("123");
+        card.setId(123L);
 
-        when(cardRepository.findById("123")).thenReturn(Optional.of(card));
+        when(cardRepository.findById(123L)).thenReturn(Optional.of(card));
 
-        Card result = cardService.getCardById("123");
+        Card result = cardService.getCardById(123L);
 
         assertNotNull(result);
         assertEquals("Front", result.getHint());
@@ -56,7 +56,7 @@ class CardServiceTest {
     void testGetCardByIdNotFound() {
 
         assertThrows(NoSuchElementException.class, () -> {
-            cardService.getCardById("foo");
+            cardService.getCardById(123L);
         });
     }
 
@@ -66,20 +66,20 @@ class CardServiceTest {
         Date daysAgo1 = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
         Card card1 = new Card("Hint1", "Answer1", daysAgo0, 0, 1);
-        card1.setId("000");
+        card1.setId(0L);
         Card card2 = new Card("Hint2", "Answer2", daysAgo1, 1, 5);
-        card2.setId("001");
+        card2.setId(1L);
 
         List<Card> mockCards = Arrays.asList(card1, card2);
 
         when(cardRepository.findAll()).thenReturn(mockCards);
-        when(cardRepository.findById("000")).thenReturn(Optional.of(card1));
-        when(cardRepository.findById("001")).thenReturn(Optional.of(card2));
+        when(cardRepository.findById(0L)).thenReturn(Optional.of(card1));
+        when(cardRepository.findById(1L)).thenReturn(Optional.of(card2));
 
         // Assuming we just answered card 000, the only valid choice is 001 since 000 would be twice
         // in a row
-        Optional<Card> firstCardSelected = cardService.getRandomCardSR("000");
-        assertEquals(firstCardSelected.get().getId(), "001");
+        Optional<Card> firstCardSelected = cardService.getRandomCardSR(0L);
+        assertEquals(firstCardSelected.get().getId(), 1L);
     }
 
     @Test
@@ -88,12 +88,12 @@ class CardServiceTest {
         Date startDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
         Card card = new Card("Hint", "Answer", startDate, 2, 1);
-        card.setId("123");
+        card.setId(123L);
 
-        when(cardRepository.findById("123")).thenReturn(Optional.of(card));
+        when(cardRepository.findById(123L)).thenReturn(Optional.of(card));
 
-        Card result = cardService.getCardById("123");
-        cardService.updateCardStreak("123", false);
+        Card result = cardService.getCardById(123L);
+        cardService.updateCardStreak(123L, false);
 
         assertEquals(0, result.getStreak());
         assertEquals(1, result.getMasteryLevel());
@@ -106,12 +106,12 @@ class CardServiceTest {
         Date startDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
         Card card = new Card("Hint", "Answer", startDate, 1, 1);
-        card.setId("123");
+        card.setId(123L);
 
-        when(cardRepository.findById("123")).thenReturn(Optional.of(card));
+        when(cardRepository.findById(123L)).thenReturn(Optional.of(card));
 
-        Card result = cardService.getCardById("123");
-        cardService.updateCardStreak("123", true);
+        Card result = cardService.getCardById(123L);
+        cardService.updateCardStreak(123L, true);
 
         assertEquals(2, result.getStreak());
         assertEquals(1, result.getMasteryLevel());
@@ -124,12 +124,12 @@ class CardServiceTest {
         Date startDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
         Card card = new Card("Hint", "Answer", startDate, 1, 4);
-        card.setId("123");
+        card.setId(123L);
 
-        when(cardRepository.findById("123")).thenReturn(Optional.of(card));
+        when(cardRepository.findById(123L)).thenReturn(Optional.of(card));
 
-        Card result = cardService.getCardById("123");
-        cardService.updateCardStreak("123", true);
+        Card result = cardService.getCardById(123L);
+        cardService.updateCardStreak(123L, true);
 
         assertEquals(5, result.getStreak());
         assertEquals(2, result.getMasteryLevel());
