@@ -7,38 +7,29 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Setter
 @Getter
+@Setter
 @NoArgsConstructor
 @ToString
-public class Card {
+@Table(name = "user_deck")
+public class UserDeck {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "card_id")
-    private Long cardId;
-    @Column(name = "clue")
-    private String clue;
-    @Column(name = "answer")
-    private String answer;
-    @Column(name = "created")
-    @CreationTimestamp
-    private Timestamp created;
+    @Column(name = "user_deck_id")
+    private Long userDeckId;
     @Column(name = "deck_id")
     private Long deckId;
     @Column(name = "owned_by")
     private Long ownedBy;
-
-    public Card(String clue, String answer, Long deckId, Long ownedBy){
-        this.clue = clue;
-        this.answer = answer;
-        this.deckId = deckId;
-        this.ownedBy = ownedBy;
-    }
+    @Column(name = "created")
+    @CreationTimestamp
+    private Timestamp created;
 }

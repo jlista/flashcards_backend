@@ -1,6 +1,7 @@
 package com.flashcards.controller;
 
 import com.flashcards.model.Card;
+import com.flashcards.model.CardDTO;
 import com.flashcards.service.CardService;
 
 import java.util.List;
@@ -21,8 +22,8 @@ public class CardController {
     }
 
     @GetMapping()
-    public List<Card> getAllCards() {
-        return cardService.getAllCards();
+    public List<CardDTO> getAllCards(@RequestParam Long userDeckId) {
+        return cardService.getAllCardsInDeck(userDeckId);
     }
 
     @GetMapping("/{id}")
@@ -31,10 +32,10 @@ public class CardController {
     }
 
     @PostMapping()
-    public Card createCard(@RequestBody CardRequestBody cardRequestBody) {
+    public Card createCard(@RequestBody CardRequestBody cardRequestBody, @RequestParam Long deckId) {
         String hint = cardRequestBody.getHint();
         String answer = cardRequestBody.getAnswer();
-        return cardService.createCard(hint, answer);
+        return cardService.createCard(hint, answer, deckId, 1l);
     }
 
     @PutMapping("/{id}")
@@ -50,18 +51,18 @@ public class CardController {
     }
 
     @GetMapping("/allPossible")
-    public List<Card> getAllPossibleCards() {
-        return cardService.getAllPossibleCards();
+    public List<CardDTO> getAllPossibleCards(@RequestParam Long userDeckId) {
+        return cardService.getAllPossibleCards(userDeckId);
     }
 
     @GetMapping("/randomsr")
-    public ResponseEntity<Card> getRandomSR(@RequestParam Optional<Long> lastAnswered) {
+    public ResponseEntity<CardDTO> getRandomSR(@RequestParam Optional<Long> lastAnswered, @RequestParam Long userDeckId) {
 
-        Optional<Card> card;
+        Optional<CardDTO> card;
         if (lastAnswered.isPresent()) {
-            card = cardService.getRandomCardSR(lastAnswered.get());
+            card = cardService.getRandomCardSR(lastAnswered.get(), userDeckId);
         } else {
-            card = cardService.getRandomCardSR();
+            card = cardService.getRandomCardSR(userDeckId);
         }
 
         if (card.isPresent()) {
@@ -72,12 +73,12 @@ public class CardController {
     }
 
     @PutMapping("/answer")
-    public void answerCard(@RequestParam Long id, @RequestBody Boolean isCorrect) {
-        cardService.updateCardStreak(id, isCorrect);
+    public void answerCard(@RequestParam Long cardId, @RequestParam Long userDeckId, @RequestBody Boolean isCorrect) {
+        cardService.updateCardStreak(cardId, userDeckId, isCorrect);
     }
 
     @PutMapping("/reset")
-    public void resetCard(@RequestParam Long id) {
-        cardService.resetCard(id);
+    public void resetCard(@RequestParam Long cardId, @RequestParam Long userDeckId) {
+        cardService.resetCard(cardId, userDeckId);
     }
 }

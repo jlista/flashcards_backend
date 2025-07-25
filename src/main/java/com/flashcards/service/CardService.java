@@ -1,12 +1,15 @@
 package com.flashcards.service;
 
 import com.flashcards.model.Card;
+import com.flashcards.model.CardDTO;
+import com.flashcards.model.DeckCard;
 import com.flashcards.repository.CardRepository;
-
+import com.flashcards.repository.DeckCardRepository;
+import com.flashcards.repository.DeckRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,21 +25,36 @@ public class CardService {
     final static Logger logger = LoggerFactory.getLogger(CardService.class);
 
     private final CardRepository cardRepository;
+    private final DeckCardRepository deckCardRepository;
+    private final DeckRepository deckRepository;
 
-    public CardService(CardRepository cardRepository) {
+    public CardService(CardRepository cardRepository, 
+                       DeckCardRepository deckCardRepository, 
+                       DeckRepository deckRepository) {
         this.cardRepository = cardRepository;
+        this.deckCardRepository = deckCardRepository;
+        this.deckRepository = deckRepository;
     }
 
-    public List<Card> getAllCards() {
-        List<Card> allCards = cardRepository.findAll();
-        List<Card> readyCards =
-                allCards.stream().filter(c -> c.getIsReadyToReview()).collect(Collectors.toList());
-        List<Card> notReadyCards =
-                allCards.stream().filter(c -> !c.getIsReadyToReview()).collect(Collectors.toList());
+    public List<CardDTO> getAllCardsInDeck(Long deckId) {
+        List<CardDTO> allCards = cardRepository.getAllCardsInUserDeck(deckId);
+        List<CardDTO> readyCards = allCards.stream().filter(c -> c.getIsReadyToReview()).collect(Collectors.toList());
+        List<CardDTO> notReadyCards = allCards.stream().filter(c -> !c.getIsReadyToReview()).collect(Collectors.toList());
         readyCards.addAll(notReadyCards);
 
         return readyCards;
     }
+
+    // public List<Card> getAllCards() {
+    //     List<Card> allCards = cardRepository.findAll();
+    //     List<Card> readyCards =
+    //             allCards.stream().filter(c -> c.getIsReadyToReview()).collect(Collectors.toList());
+    //     List<Card> notReadyCards =
+    //             allCards.stream().filter(c -> !c.getIsReadyToReview()).collect(Collectors.toList());
+    //     readyCards.addAll(notReadyCards);
+
+    //     return readyCards;
+    // }
 
     public Card getCardById(Long id) {
         /**
@@ -45,17 +63,25 @@ public class CardService {
         return cardRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
     }
 
-    public List<Card> getAllPossibleCards() {
-        return getAllCards().stream().filter(card -> card.getIsReadyToReview()).toList();
+    
+    public DeckCard getDeckCardById(Long cardId, Long deckId) {
+        /**
+         * Given an id string, find and return the card with that id.
+         */
+        return deckCardRepository.findByCardAndDeckId(cardId, deckId).orElseThrow(() -> new NoSuchElementException());
     }
 
-    public List<Card> getBalancedPossibleCards() {
-        List<Card> cardChoices = getAllPossibleCards();
+    public List<CardDTO> getAllPossibleCards(Long deckId) {
+        return getAllCardsInDeck(deckId).stream().filter(card -> card.getIsReadyToReview()).toList();
+    }
 
-        List<Card> balancedCardChoices = new ArrayList<Card>();
+    public List<CardDTO> getBalancedPossibleCards(Long deckId) {
+        List<CardDTO> cardChoices = getAllPossibleCards(deckId);
+
+        List<CardDTO> balancedCardChoices = new ArrayList<CardDTO>();
 
         for (int i = 0; i < cardChoices.size(); i++) {
-            Card card = cardChoices.get(i);
+            CardDTO card = cardChoices.get(i);
             if (card.getMasteryLevel() > 0) {
                 balancedCardChoices.add(card);
             } else {
@@ -68,7 +94,7 @@ public class CardService {
         return balancedCardChoices;
     }
 
-    public Optional<Card> getRandomCardSR() {
+    public Optional<CardDTO> getRandomCardSR(Long deckId) {
         /**
          * Searches the database for all eligible cards based on streak and mastery level, and
          * chooses one randomly
@@ -76,7 +102,7 @@ public class CardService {
          * @return a randomly-selected eligible card
          */
 
-        List<Card> balancedCardChoices = getBalancedPossibleCards();
+        List<CardDTO> balancedCardChoices = getBalancedPossibleCards(deckId);
 
         if (balancedCardChoices.size() > 0) {
             Random rand = new Random();
@@ -85,7 +111,7 @@ public class CardService {
         return Optional.empty();
     }
 
-    public Optional<Card> getRandomCardSR(Long lastCorrect) {
+    public Optional<CardDTO> getRandomCardSR(Long lastCorrect, Long deckId) {
         /**
          * Searches the database for all eligible cards based on streak and mastery level, and
          * chooses one randomly. Does not choose the most recently seen card unless that is the only
@@ -94,28 +120,28 @@ public class CardService {
          * @param lastCorrect the ID of the most recently seen card
          * @return a randomly-selected eligible card
          */
-        List<Card> balancedCardChoices = getBalancedPossibleCards();
+        List<CardDTO> balancedCardChoices = getBalancedPossibleCards(deckId);
 
         if (balancedCardChoices.isEmpty()) {
             return Optional.empty();
         }
 
         // if the only choice is to show the previous card again, then show it
-        if (!balancedCardChoices.stream().anyMatch(item -> !item.getId().equals(lastCorrect))) {
+        if (!balancedCardChoices.stream().anyMatch(item -> !item.getCardId().equals(lastCorrect))) {
             return Optional.of(balancedCardChoices.get(0));
         }
 
         // otherwise, look for a choice that does not match the previous
         Random rand = new Random();
-        Card card;
+        CardDTO card;
         do {
             card = balancedCardChoices.get(rand.nextInt(balancedCardChoices.size()));
 
-        } while (card.getId().equals(lastCorrect));
+        } while (card.getCardId().equals(lastCorrect));
         return Optional.of(card);
     }
 
-    public void updateCardStreak(Long id, Boolean isCorrect) {
+    public void updateCardStreak(Long cardId, long userDeckId, Boolean isCorrect) {
         /**
          * Updates the streak and mastery level of a card based on whether or not the user answered
          * correctly
@@ -123,7 +149,7 @@ public class CardService {
          * @param card the card to update
          * @param isCorrect whether or not the user answered correctly
          */
-        Card card = getCardById(id);
+        DeckCard card = getDeckCardById(cardId, userDeckId);
         int mastery_level = card.getMasteryLevel();
 
         if (!isCorrect) {
@@ -135,22 +161,29 @@ public class CardService {
                 card.setMasteryLevel(mastery_level + 1);
             }
             card.setStreak(streak);
-            Date now = Date.from(Instant.now());
+            Timestamp now = Timestamp.from(Instant.now());
             card.setLastCorrect(now);
         }
-        cardRepository.save(card);
+        deckCardRepository.save(card);
     }
 
-    public Card createCard(String hint, String answer) {
-        Card card = new Card(hint, answer);
-        Card res = cardRepository.save(card);
-        logger.info("Created card: " + res.toString());
-        return res;
+    public Card createCard(String clue, String answer, Long deckId, Long userId) {
+
+        Card card = cardRepository.save(new Card(clue, answer, deckId, userId));
+
+        List<Long> userDeckIds = deckRepository.getAssociatedUserDeckIds(deckId);
+
+        for (int i = 0; i < userDeckIds.size(); i++){
+            deckCardRepository.save(new DeckCard(card.getCardId(), userDeckIds.get(i)));
+        }
+
+        logger.info("Created card: " + card.toString());
+        return card;
     }
 
-    public Card updateCard(Long id, String hint, String answer) {
+    public Card updateCard(Long id, String clue, String answer) {
         Card card = getCardById(id);
-        card.setHint(hint);
+        card.setClue(clue);
         card.setAnswer(answer);
         Card res = cardRepository.save(card);
         logger.info("Updated card: " + res.toString());
@@ -159,15 +192,15 @@ public class CardService {
 
     public void deleteCard(Long id) {
         Card card = getCardById(id);
-        logger.info("Deleted card: " + card.toString());
         cardRepository.delete(card);
+        logger.info("Deleted card: " + card.toString());
     }
 
-    public void resetCard(Long id) {
-        Card card = getCardById(id);
+    public void resetCard(Long cardId, Long deckId) {
+        DeckCard card = getDeckCardById(cardId, deckId);
         card.setLastCorrect(null);
         card.setMasteryLevel(0);
         card.setStreak(0);
-        cardRepository.save(card);
+        deckCardRepository.save(card);
     }
 }

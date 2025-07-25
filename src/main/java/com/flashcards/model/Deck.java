@@ -13,32 +13,23 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Setter
 @Getter
+@Setter
 @NoArgsConstructor
 @ToString
-public class Card {
+public class Deck {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "card_id")
-    private Long cardId;
-    @Column(name = "clue")
-    private String clue;
-    @Column(name = "answer")
-    private String answer;
+    @Column(name = "deck_id")
+    private Long deckId;
+    @Column(name = "deck_name")
+    private String deckName;
+    @Column(name = "description")
+    private String description;
+    @Column(name = "owned_by")
+    private Long ownedBy;
     @Column(name = "created")
     @CreationTimestamp
     private Timestamp created;
-    @Column(name = "deck_id")
-    private Long deckId;
-    @Column(name = "owned_by")
-    private Long ownedBy;
-
-    public Card(String clue, String answer, Long deckId, Long ownedBy){
-        this.clue = clue;
-        this.answer = answer;
-        this.deckId = deckId;
-        this.ownedBy = ownedBy;
-    }
 }
