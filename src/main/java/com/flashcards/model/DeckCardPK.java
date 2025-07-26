@@ -14,13 +14,15 @@ public class DeckCardPK implements Serializable {
 
       @Override
       public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof DeckCardPK deckCardPK)) return false;
-                  return userDeckId == deckCardPK.userDeckId && cardId == deckCardPK.cardId;
+            if (this == o)
+                  return true;
+            if (!(o instanceof DeckCardPK deckCardPK))
+                  return false;
+            return userDeckId == deckCardPK.userDeckId && cardId == deckCardPK.cardId;
       }
 
       @Override
       public int hashCode() {
             return Objects.hash(cardId, userDeckId);
       }
-} 
+}

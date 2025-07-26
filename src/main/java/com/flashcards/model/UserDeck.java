@@ -21,7 +21,7 @@ import lombok.ToString;
 @Table(name = "user_deck")
 public class UserDeck {
 
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_deck_id", nullable = false, unique = true)
     private Long userDeckId;

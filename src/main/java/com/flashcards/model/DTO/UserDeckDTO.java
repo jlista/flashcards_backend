@@ -17,7 +17,7 @@ public class UserDeckDTO {
     private int num_cards;
     private int num_cards_ready;
 
-    public UserDeckDTO(Long userDeckId, Long deckId, Long userId, String deck_name, String deck_desc){
+    public UserDeckDTO(Long userDeckId, Long deckId, Long userId, String deck_name, String deck_desc) {
         this.userDeckId = userDeckId;
         this.deckId = deckId;
         this.userId = userId;

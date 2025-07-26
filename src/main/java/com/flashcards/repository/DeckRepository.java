@@ -8,8 +8,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface DeckRepository extends JpaRepository<Deck, Long> {
 
-    @Query("Select u.userDeckId " +
-           "FROM Deck d JOIN UserDeck u on d.deckId = u.deckId " +
-           "WHERE d.deckId = :id" )
+    @Query("Select u.userDeckId " 
+            + "FROM Deck d JOIN UserDeck u on d.deckId = u.deckId "
+            + "WHERE d.deckId = :id")
     List<Long> getAssociatedUserDeckIds(@Param("id") Long deckId);
 }

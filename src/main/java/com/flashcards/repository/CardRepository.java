@@ -9,16 +9,16 @@ import org.springframework.data.repository.query.Param;
 
 public interface CardRepository extends JpaRepository<Card, Long> {
 
-    Card findByCardId(Long cardId);
+       Card findByCardId(Long cardId);
 
-    @Query("SELECT new com.flashcards.model.Card(c.cardId, c.clue, c.answer, c.created, c.deckId, c.ownedBy) " +
-           "FROM Card c JOIN Deck d ON c.deckId = d.deckId " +
-           "WHERE d.deckId = :id")
-    List<Card> getAllCardsInDeck(@Param("id") Long deckId);
+       @Query("SELECT new com.flashcards.model.Card(c.cardId, c.clue, c.answer, c.created, c.deckId, c.ownedBy) "
+                     + "FROM Card c JOIN Deck d ON c.deckId = d.deckId " 
+                     + "WHERE d.deckId = :id")
+       List<Card> getAllCardsInDeck(@Param("id") Long deckId);
 
-    @Query("SELECT new com.flashcards.model.DTO.CardDTO(c.cardId, c.clue, c.answer, d.masteryLevel, d.streak, d.lastCorrect, d.isFlagged) " +
-           "FROM Card c JOIN DeckCard d ON c.cardId = d.cardId " +
-           "WHERE d.userDeckId = :id")
-    List<CardDTO> getAllCardsInUserDeck(@Param("id") Long userDeckId);
+       @Query("SELECT new com.flashcards.model.DTO.CardDTO(c.cardId, c.clue, c.answer, d.masteryLevel, d.streak, d.lastCorrect, d.isFlagged) "
+                     + "FROM Card c JOIN DeckCard d ON c.cardId = d.cardId "
+                     + "WHERE d.userDeckId = :id")
+       List<CardDTO> getAllCardsInUserDeck(@Param("id") Long userDeckId);
 
 }

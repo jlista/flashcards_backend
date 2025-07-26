@@ -19,7 +19,7 @@ import lombok.ToString;
 @ToString
 public class Card {
 
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "card_id", nullable = false, unique = true)
     private Long cardId;
@@ -35,7 +35,7 @@ public class Card {
     @Column(name = "owned_by", nullable = false, unique = false)
     private Long ownedBy;
 
-    public Card(String clue, String answer, Long deckId, Long ownedBy){
+    public Card(String clue, String answer, Long deckId, Long ownedBy) {
         this.clue = clue;
         this.answer = answer;
         this.deckId = deckId;

@@ -27,32 +27,33 @@ public class CardService {
     private final DeckCardRepository deckCardRepository;
     private final DeckRepository deckRepository;
 
-    public CardService(CardRepository cardRepository, 
-                       DeckCardRepository deckCardRepository, 
-                       DeckRepository deckRepository) {
+    public CardService(CardRepository cardRepository, DeckCardRepository deckCardRepository,
+            DeckRepository deckRepository) {
         this.cardRepository = cardRepository;
         this.deckCardRepository = deckCardRepository;
         this.deckRepository = deckRepository;
     }
 
-    public List<CardDTO> getAllCardsInDeck(Long deckId) {
-        List<CardDTO> allCards = cardRepository.getAllCardsInUserDeck(deckId);
-        List<CardDTO> readyCards = allCards.stream().filter(c -> c.getIsReadyToReview()).collect(Collectors.toList());
-        List<CardDTO> notReadyCards = allCards.stream().filter(c -> !c.getIsReadyToReview()).collect(Collectors.toList());
+    public List<CardDTO> getAllCardsInUserDeck(Long userDeckId) {
+        List<CardDTO> allCards = cardRepository.getAllCardsInUserDeck(userDeckId);
+        List<CardDTO> readyCards =
+                allCards.stream().filter(c -> c.getIsReadyToReview()).collect(Collectors.toList());
+        List<CardDTO> notReadyCards =
+                allCards.stream().filter(c -> !c.getIsReadyToReview()).collect(Collectors.toList());
         readyCards.addAll(notReadyCards);
 
         return readyCards;
     }
 
     // public List<Card> getAllCards() {
-    //     List<Card> allCards = cardRepository.findAll();
-    //     List<Card> readyCards =
-    //             allCards.stream().filter(c -> c.getIsReadyToReview()).collect(Collectors.toList());
-    //     List<Card> notReadyCards =
-    //             allCards.stream().filter(c -> !c.getIsReadyToReview()).collect(Collectors.toList());
-    //     readyCards.addAll(notReadyCards);
+    // List<Card> allCards = cardRepository.findAll();
+    // List<Card> readyCards =
+    // allCards.stream().filter(c -> c.getIsReadyToReview()).collect(Collectors.toList());
+    // List<Card> notReadyCards =
+    // allCards.stream().filter(c -> !c.getIsReadyToReview()).collect(Collectors.toList());
+    // readyCards.addAll(notReadyCards);
 
-    //     return readyCards;
+    // return readyCards;
     // }
 
     public Card getCardById(Long id) {
@@ -62,16 +63,18 @@ public class CardService {
         return cardRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
     }
 
-    
+
     public DeckCard getDeckCardById(Long cardId, Long deckId) {
         /**
          * Given an id string, find and return the card with that id.
          */
-        return deckCardRepository.findByCardAndDeckId(cardId, deckId).orElseThrow(() -> new NoSuchElementException());
+        return deckCardRepository.findByCardAndDeckId(cardId, deckId)
+                .orElseThrow(() -> new NoSuchElementException());
     }
 
-    public List<CardDTO> getAllPossibleCards(Long deckId) {
-        return getAllCardsInDeck(deckId).stream().filter(card -> card.getIsReadyToReview()).toList();
+    public List<CardDTO> getAllPossibleCards(Long userDeckId) {
+        return getAllCardsInUserDeck(userDeckId).stream().filter(card -> card.getIsReadyToReview())
+                .toList();
     }
 
     public List<CardDTO> getBalancedPossibleCards(Long deckId) {
@@ -172,7 +175,7 @@ public class CardService {
 
         List<Long> userDeckIds = deckRepository.getAssociatedUserDeckIds(deckId);
 
-        for (int i = 0; i < userDeckIds.size(); i++){
+        for (int i = 0; i < userDeckIds.size(); i++) {
             deckCardRepository.save(new DeckCard(card.getCardId(), userDeckIds.get(i)));
         }
 

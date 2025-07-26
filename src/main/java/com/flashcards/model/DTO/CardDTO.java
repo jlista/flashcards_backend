@@ -21,7 +21,7 @@ public class CardDTO {
     private Timestamp lastCorrect;
     private boolean isFlagged;
 
-    public CardDTO(String clue, String answer, int mastery_level, int streak, Timestamp lastCorrect){
+    public CardDTO(String clue, String answer, int mastery_level, int streak, Timestamp lastCorrect) {
         this.clue = clue;
         this.answer = answer;
         this.masteryLevel = mastery_level;
@@ -29,7 +29,7 @@ public class CardDTO {
         this.lastCorrect = lastCorrect;
     }
 
-     public boolean getIsReadyToReview() {
+    public boolean getIsReadyToReview() {
 
         if (isFlagged || masteryLevel == 0) {
             return true;
@@ -58,8 +58,7 @@ public class CardDTO {
     public int getPriority() {
         if (isFlagged) {
             return 10;
-        }
-        else if (masteryLevel == 0){
+        } else if (masteryLevel == 0) {
             return 5 - streak;
         }
         return 1;

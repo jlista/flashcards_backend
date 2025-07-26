@@ -18,8 +18,7 @@ public class DeckService {
     private final DeckRepository deckRepository;
     private final UserDeckRepository userDeckRepository;
 
-    public DeckService(DeckRepository deckRepository,
-                       UserDeckRepository userDeckRepository) {
+    public DeckService(DeckRepository deckRepository, UserDeckRepository userDeckRepository) {
 
         this.deckRepository = deckRepository;
         this.userDeckRepository = userDeckRepository;

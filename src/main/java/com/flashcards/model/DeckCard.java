@@ -27,7 +27,7 @@ import lombok.ToString;
 @Table(name = "deck_card")
 public class DeckCard {
 
-	@Id
+    @Id
     @Column(name = "card_id", nullable = false, unique = false)
     private Long cardId;
     @Id
@@ -46,10 +46,11 @@ public class DeckCard {
     private Timestamp created;
     @Transient
     private boolean isReadyToReview;
-    @Transient 
+    @Transient
     private int priority;
 
-    public DeckCard(long cardId, long userDeckId, Timestamp lastCorrect, int masteryLevel, int streak, boolean isFlagged, Timestamp created) {
+    public DeckCard(long cardId, long userDeckId, Timestamp lastCorrect, int masteryLevel,
+            int streak, boolean isFlagged, Timestamp created) {
         this.cardId = cardId;
         this.userDeckId = userDeckId;
         this.lastCorrect = lastCorrect;
@@ -93,8 +94,7 @@ public class DeckCard {
     public int getPriority() {
         if (isFlagged) {
             return 10;
-        }
-        else if (masteryLevel == 0){
+        } else if (masteryLevel == 0) {
             return 5 - streak;
         }
         return 1;

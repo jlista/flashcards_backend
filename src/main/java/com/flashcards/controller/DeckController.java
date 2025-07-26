@@ -23,7 +23,8 @@ public class DeckController {
     }
 
     @PostMapping()
-    public UserDeckDTO createDeck(@RequestBody DeckCreationDTO requestBody, @RequestParam Long userId) {
+    public UserDeckDTO createDeck(@RequestBody DeckCreationDTO requestBody,
+            @RequestParam Long userId) {
         String deckName = requestBody.getName();
         String description = requestBody.getDescription();
         return deckService.createDeck(userId, deckName, description);

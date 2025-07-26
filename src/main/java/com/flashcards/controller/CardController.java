@@ -24,7 +24,7 @@ public class CardController {
 
     @GetMapping()
     public List<CardDTO> getAllCards(@RequestParam Long userDeckId) {
-        return cardService.getAllCardsInDeck(userDeckId);
+        return cardService.getAllCardsInUserDeck(userDeckId);
     }
 
     @GetMapping("/{id}")
@@ -57,7 +57,8 @@ public class CardController {
     }
 
     @GetMapping("/randomsr")
-    public ResponseEntity<CardDTO> getRandomSR(@RequestParam Optional<Long> lastAnswered, @RequestParam Long userDeckId) {
+    public ResponseEntity<CardDTO> getRandomSR(@RequestParam Optional<Long> lastAnswered,
+            @RequestParam Long userDeckId) {
 
         Optional<CardDTO> card;
         if (lastAnswered.isPresent()) {
@@ -74,7 +75,8 @@ public class CardController {
     }
 
     @PutMapping("/answer")
-    public void answerCard(@RequestParam Long cardId, @RequestParam Long userDeckId, @RequestBody Boolean isCorrect) {
+    public void answerCard(@RequestParam Long cardId, @RequestParam Long userDeckId,
+            @RequestBody Boolean isCorrect) {
         cardService.updateCardStreak(cardId, userDeckId, isCorrect);
     }
 
@@ -82,4 +84,4 @@ public class CardController {
     public void resetCard(@RequestParam Long cardId, @RequestParam Long userDeckId) {
         cardService.resetCard(cardId, userDeckId);
     }
-} 
+}
