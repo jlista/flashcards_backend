@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,31 +22,42 @@ import lombok.ToString;
 @Setter
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString
 @Table(name = "deck_card")
 public class DeckCard {
 
 	@Id
-    @Column(name = "card_id")
+    @Column(name = "card_id", nullable = false, unique = false)
     private Long cardId;
     @Id
-    @Column(name = "user_deck_id")
+    @Column(name = "user_deck_id", nullable = false, unique = false)
     private Long userDeckId;
-    @Column(name = "last_correct")
+    @Column(name = "last_correct", nullable = true, unique = false)
     private Timestamp lastCorrect;
-    @Column(name = "mastery_level")
+    @Column(name = "mastery_level", nullable = false, unique = false)
     private int masteryLevel;
-    @Column(name = "streak")
+    @Column(name = "streak", nullable = false, unique = false)
     private int streak;
-    @Column(name = "is_flagged")
+    @Column(name = "is_flagged", nullable = false, unique = false)
     private boolean isFlagged;
-    @Column(name = "created")
+    @Column(name = "created", nullable = false, unique = false)
     @CreationTimestamp
     private Timestamp created;
     @Transient
     private boolean isReadyToReview;
     @Transient 
     private int priority;
+
+    public DeckCard(long cardId, long userDeckId, Timestamp lastCorrect, int masteryLevel, int streak, boolean isFlagged, Timestamp created) {
+        this.cardId = cardId;
+        this.userDeckId = userDeckId;
+        this.lastCorrect = lastCorrect;
+        this.masteryLevel = masteryLevel;
+        this.streak = streak;
+        this.isFlagged = isFlagged;
+        this.created = created;
+    }
 
     public DeckCard(long cardId, long userDeckId) {
         this.cardId = cardId;

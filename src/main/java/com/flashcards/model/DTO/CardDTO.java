@@ -1,4 +1,4 @@
-package com.flashcards.model;
+package com.flashcards.model.DTO;
 
 import java.sql.Timestamp;
 import java.time.Instant;

@@ -1,11 +1,12 @@
 package com.flashcards.service;
 
 import com.flashcards.model.Card;
-import com.flashcards.model.CardDTO;
 import com.flashcards.model.DeckCard;
+import com.flashcards.model.DTO.CardDTO;
 import com.flashcards.repository.CardRepository;
 import com.flashcards.repository.DeckCardRepository;
 import com.flashcards.repository.DeckRepository;
+import com.flashcards.repository.UserDeckRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.sql.Timestamp;
@@ -25,6 +26,7 @@ class CardServiceTest {
     private CardRepository cardRepository;
     private DeckRepository deckRepository;
     private DeckCardRepository deckCardRepository;
+    private UserDeckRepository userDeckRepository;
     private CardService cardService;
 
     @BeforeEach
@@ -32,6 +34,7 @@ class CardServiceTest {
         cardRepository = mock(CardRepository.class);
         deckRepository = mock(DeckRepository.class);
         deckCardRepository = mock(DeckCardRepository.class);
+        userDeckRepository = mock(UserDeckRepository.class);
         cardService = new CardService(cardRepository, deckCardRepository, deckRepository);
     }
 

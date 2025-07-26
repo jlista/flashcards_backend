@@ -8,6 +8,7 @@ import com.flashcards.repository.AppUserRepository;
 import com.flashcards.repository.CardRepository;
 import com.flashcards.repository.DeckCardRepository;
 import com.flashcards.repository.DeckRepository;
+import com.flashcards.repository.UserDeckRepository;
 
 @SpringBootApplication
 //@EnableJpaRepositories(basePackages = "com.flashcards.repository")
@@ -23,7 +24,9 @@ public class FlashcardsBackendApplication {
     @Autowired
     DeckRepository deckRepository;
     @Autowired
-    AppUserRepository dppUserRepository;
+    AppUserRepository appUserRepository;
+    @Autowired
+    UserDeckRepository userDeckRepository;
 }
 
 

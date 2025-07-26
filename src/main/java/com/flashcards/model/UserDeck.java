@@ -22,14 +22,14 @@ import lombok.ToString;
 public class UserDeck {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_deck_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_deck_id", nullable = false, unique = true)
     private Long userDeckId;
-    @Column(name = "deck_id")
+    @Column(name = "deck_id", nullable = false, unique = false)
     private Long deckId;
-    @Column(name = "owned_by")
+    @Column(name = "owned_by", nullable = false, unique = false)
     private Long ownedBy;
-    @Column(name = "created")
+    @Column(name = "created", nullable = false, unique = false)
     @CreationTimestamp
     private Timestamp created;
 }

@@ -3,10 +3,8 @@ package com.flashcards.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @NoArgsConstructor
 @Getter

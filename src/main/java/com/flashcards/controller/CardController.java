@@ -1,9 +1,10 @@
 package com.flashcards.controller;
 
 import com.flashcards.model.Card;
-import com.flashcards.model.CardDTO;
+import com.flashcards.model.DTO.CardDTO;
+import com.flashcards.model.DTO.CardCreationDTO;
 import com.flashcards.service.CardService;
-
+import com.flashcards.service.DeckService;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +18,7 @@ public class CardController {
 
     private final CardService cardService;
 
-    public CardController(CardService cardService) {
+    public CardController(CardService cardService, DeckService deckService) {
         this.cardService = cardService;
     }
 
@@ -32,16 +33,16 @@ public class CardController {
     }
 
     @PostMapping()
-    public Card createCard(@RequestBody CardRequestBody cardRequestBody, @RequestParam Long deckId) {
-        String hint = cardRequestBody.getHint();
-        String answer = cardRequestBody.getAnswer();
+    public Card createCard(@RequestBody CardCreationDTO requestBody, @RequestParam Long deckId) {
+        String hint = requestBody.getHint();
+        String answer = requestBody.getAnswer();
         return cardService.createCard(hint, answer, deckId, 1l);
     }
 
     @PutMapping("/{id}")
-    public Card updateCard(@PathVariable Long id, @RequestBody CardRequestBody cardRequestBody) {
-        String hint = cardRequestBody.getHint();
-        String answer = cardRequestBody.getAnswer();
+    public Card updateCard(@PathVariable Long id, @RequestBody CardCreationDTO requestBody) {
+        String hint = requestBody.getHint();
+        String answer = requestBody.getAnswer();
         return cardService.updateCard(id, hint, answer);
     }
 
@@ -81,4 +82,4 @@ public class CardController {
     public void resetCard(@RequestParam Long cardId, @RequestParam Long userDeckId) {
         cardService.resetCard(cardId, userDeckId);
     }
-}
+} 

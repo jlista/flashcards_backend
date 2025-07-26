@@ -1,8 +1,8 @@
 package com.flashcards.service;
 
 import com.flashcards.model.Card;
-import com.flashcards.model.CardDTO;
 import com.flashcards.model.DeckCard;
+import com.flashcards.model.DTO.CardDTO;
 import com.flashcards.repository.CardRepository;
 import com.flashcards.repository.DeckCardRepository;
 import com.flashcards.repository.DeckRepository;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -203,4 +202,6 @@ public class CardService {
         card.setStreak(0);
         deckCardRepository.save(card);
     }
+
+
 }

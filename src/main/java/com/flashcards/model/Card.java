@@ -20,19 +20,19 @@ import lombok.ToString;
 public class Card {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "card_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "card_id", nullable = false, unique = true)
     private Long cardId;
-    @Column(name = "clue")
+    @Column(name = "clue", length = 255, nullable = false, unique = false)
     private String clue;
-    @Column(name = "answer")
+    @Column(name = "answer", length = 511, nullable = false, unique = false)
     private String answer;
-    @Column(name = "created")
+    @Column(name = "created", nullable = false, unique = false)
     @CreationTimestamp
     private Timestamp created;
-    @Column(name = "deck_id")
+    @Column(name = "deck_id", nullable = false, unique = false)
     private Long deckId;
-    @Column(name = "owned_by")
+    @Column(name = "owned_by", nullable = false, unique = false)
     private Long ownedBy;
 
     public Card(String clue, String answer, Long deckId, Long ownedBy){

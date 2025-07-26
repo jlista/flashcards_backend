@@ -21,13 +21,13 @@ import lombok.ToString;
 @Table(name = "app_user")
 public class AppUser {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id", nullable = false, unique = true)
     private Long userId;
-    @Column(name = "username")
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
-    @Column(name = "created")
+    @Column(name = "created", nullable = false, unique = false)
     @CreationTimestamp
     private Timestamp created;
 }
