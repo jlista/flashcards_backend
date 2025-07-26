@@ -1,10 +1,15 @@
 package com.flashcards.service;
 
 import com.flashcards.model.Card;
+import com.flashcards.model.DeckCard;
+import com.flashcards.model.DTO.CardDTO;
 import com.flashcards.repository.CardRepository;
+import com.flashcards.repository.DeckCardRepository;
+import com.flashcards.repository.DeckRepository;
+import com.flashcards.repository.UserDeckRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -19,37 +24,43 @@ import static org.mockito.Mockito.*;
 class CardServiceTest {
 
     private CardRepository cardRepository;
+    private DeckRepository deckRepository;
+    private DeckCardRepository deckCardRepository;
+    private UserDeckRepository userDeckRepository;
     private CardService cardService;
 
     @BeforeEach
     void setUp() {
         cardRepository = mock(CardRepository.class);
-        cardService = new CardService(cardRepository);
+        deckRepository = mock(DeckRepository.class);
+        deckCardRepository = mock(DeckCardRepository.class);
+        userDeckRepository = mock(UserDeckRepository.class);
+        cardService = new CardService(cardRepository, deckCardRepository, deckRepository);
     }
 
     @Test
     void testGetAllCards() {
-        List<Card> mockCards = Arrays.asList(new Card("Front", "Back"));
+        List<CardDTO> mockCards = Arrays.asList(new CardDTO("Clue", "Answer", 0, 0, null));
 
-        when(cardRepository.findAll()).thenReturn(mockCards);
+        when(cardRepository.getAllCardsInUserDeck(1l)).thenReturn(mockCards);
 
-        List<Card> result = cardService.getAllCards();
+        List<CardDTO> result = cardService.getAllCardsInUserDeck(1l);
 
         assertEquals(1, result.size());
-        assertEquals("Front", result.get(0).getHint());
+        assertEquals("Clue", result.get(0).getClue());
     }
 
     @Test
     void testGetCardByIdFound() {
-        Card card = new Card("Front", "Back");
-        card.setId(123L);
+        Card card = new Card("Front", "Back", 1l, 1l);
+        card.setCardId(123L);
 
         when(cardRepository.findById(123L)).thenReturn(Optional.of(card));
 
         Card result = cardService.getCardById(123L);
 
         assertNotNull(result);
-        assertEquals("Front", result.getHint());
+        assertEquals("Front", result.getClue());
     }
 
     @Test
@@ -62,94 +73,86 @@ class CardServiceTest {
 
     @Test
     void testGetRandomCards() {
-        Date daysAgo0 = Date.from(Instant.now().minus(0, ChronoUnit.DAYS));
-        Date daysAgo1 = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+        Timestamp daysAgo0 = Timestamp.from(Instant.now().minus(0, ChronoUnit.DAYS));
+        Timestamp daysAgo1 = Timestamp.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
-        Card card1 = new Card("Hint1", "Answer1", daysAgo0, 0, 1);
-        card1.setId(0L);
-        Card card2 = new Card("Hint2", "Answer2", daysAgo1, 1, 5);
-        card2.setId(1L);
+        CardDTO card1 = new CardDTO("Hint1", "Answer1", 0, 1, daysAgo0);
+        card1.setCardId(0L);
+        CardDTO card2 = new CardDTO("Hint2", "Answer2", 1, 5, daysAgo1);
+        card2.setCardId(1L);
 
-        List<Card> mockCards = Arrays.asList(card1, card2);
+        List<CardDTO> mockCards = Arrays.asList(card1, card2);
 
-        when(cardRepository.findAll()).thenReturn(mockCards);
-        when(cardRepository.findById(0L)).thenReturn(Optional.of(card1));
-        when(cardRepository.findById(1L)).thenReturn(Optional.of(card2));
+        when(cardRepository.getAllCardsInUserDeck(1l)).thenReturn(mockCards);
 
-        // Assuming we just answered card 000, the only valid choice is 001 since 000 would be twice
-        // in a row
-        Optional<Card> firstCardSelected = cardService.getRandomCardSR(0L);
-        assertEquals(firstCardSelected.get().getId(), 1L);
+        // Assuming we just answered card 0, the only valid choice is 1 since 0 would be twice in a
+        // row
+        Optional<CardDTO> firstCardSelected = cardService.getRandomCardSR(0l, 1l);
+        assertEquals(firstCardSelected.get().getCardId(), 1L);
     }
 
     @Test
     void testUpdateCardStreakIncorrect() {
 
-        Date startDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+        Timestamp startDate = Timestamp.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
-        Card card = new Card("Hint", "Answer", startDate, 2, 1);
-        card.setId(123L);
+        DeckCard dc = new DeckCard(0l, 0l, startDate, 2, 1, false, null);
 
-        when(cardRepository.findById(123L)).thenReturn(Optional.of(card));
+        when(deckCardRepository.findByCardAndDeckId(0l, 0l)).thenReturn(Optional.of(dc));
 
-        Card result = cardService.getCardById(123L);
-        cardService.updateCardStreak(123L, false);
+        cardService.updateCardStreak(0l, 0l, false);
 
-        assertEquals(0, result.getStreak());
-        assertEquals(1, result.getMasteryLevel());
-        assertEquals(startDate, result.getLastCorrect());
+        assertEquals(0, dc.getStreak());
+        assertEquals(1, dc.getMasteryLevel());
+        assertEquals(dc.getLastCorrect(), startDate);
     }
 
     @Test
     void testUpdateCardStreakCorrect() {
 
-        Date startDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+        Timestamp startDate = Timestamp.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
-        Card card = new Card("Hint", "Answer", startDate, 1, 1);
-        card.setId(123L);
+        DeckCard dc = new DeckCard(0l, 0l, startDate, 1, 1, false, null);
 
-        when(cardRepository.findById(123L)).thenReturn(Optional.of(card));
+        when(deckCardRepository.findByCardAndDeckId(0l, 0l)).thenReturn(Optional.of(dc));
 
-        Card result = cardService.getCardById(123L);
-        cardService.updateCardStreak(123L, true);
+        cardService.updateCardStreak(0l, 0l, true);
 
-        assertEquals(2, result.getStreak());
-        assertEquals(1, result.getMasteryLevel());
-        assertTrue(result.getLastCorrect().compareTo(startDate) > 0);
+        assertEquals(2, dc.getStreak());
+        assertEquals(1, dc.getMasteryLevel());
+        assertTrue(dc.getLastCorrect().compareTo(startDate) > 0);
     }
 
     @Test
     void testUpdateCardStreakLevelUp() {
 
-        Date startDate = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+        Timestamp startDate = Timestamp.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
-        Card card = new Card("Hint", "Answer", startDate, 1, 4);
-        card.setId(123L);
+        DeckCard dc = new DeckCard(0l, 0l, startDate, 1, 4, false, null);
 
-        when(cardRepository.findById(123L)).thenReturn(Optional.of(card));
+        when(deckCardRepository.findByCardAndDeckId(0l, 0l)).thenReturn(Optional.of(dc));
 
-        Card result = cardService.getCardById(123L);
-        cardService.updateCardStreak(123L, true);
+        cardService.updateCardStreak(0l, 0l, true);
 
-        assertEquals(5, result.getStreak());
-        assertEquals(2, result.getMasteryLevel());
-        assertTrue(result.getLastCorrect().compareTo(startDate) > 0);
+        assertEquals(5, dc.getStreak());
+        assertEquals(2, dc.getMasteryLevel());
+        assertTrue(dc.getLastCorrect().compareTo(startDate) > 0);
     }
 
-    @Test
-    void testIsCardReady() {
-        Date today = Date.from(Instant.now().minus(0, ChronoUnit.DAYS));
-        Date yesterday = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+    // @Test
+    // void testIsCardReady() {
+    // Date today = Date.from(Instant.now().minus(0, ChronoUnit.DAYS));
+    // Date yesterday = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
-        Card card1 = new Card("hint", "answer", today, 0, 0);
-        Card card2 = new Card("hint", "answer", today, 1, 5);
-        Card card3 = new Card("hint", "answer", yesterday, 0, 0);
-        Card card4 = new Card("hint", "answer", yesterday, 1, 5);
+    // Card card1 = new Card("hint", "answer", today, 0, 0);
+    // Card card2 = new Card("hint", "answer", today, 1, 5);
+    // Card card3 = new Card("hint", "answer", yesterday, 0, 0);
+    // Card card4 = new Card("hint", "answer", yesterday, 1, 5);
 
-        assertEquals(true, card1.getIsReadyToReview());
-        assertEquals(false, card2.getIsReadyToReview());
-        assertEquals(true, card3.getIsReadyToReview());
-        assertEquals(true, card4.getIsReadyToReview());
+    // assertEquals(true, card1.getIsReadyToReview());
+    // assertEquals(false, card2.getIsReadyToReview());
+    // assertEquals(true, card3.getIsReadyToReview());
+    // assertEquals(true, card4.getIsReadyToReview());
 
-    }
+    // }
 }

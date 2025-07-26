@@ -1,8 +1,10 @@
 package com.flashcards.controller;
 
 import com.flashcards.model.Card;
+import com.flashcards.model.DTO.CardDTO;
+import com.flashcards.model.DTO.CardCreationDTO;
 import com.flashcards.service.CardService;
-
+import com.flashcards.service.DeckService;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,13 +18,13 @@ public class CardController {
 
     private final CardService cardService;
 
-    public CardController(CardService cardService) {
+    public CardController(CardService cardService, DeckService deckService) {
         this.cardService = cardService;
     }
 
     @GetMapping()
-    public List<Card> getAllCards() {
-        return cardService.getAllCards();
+    public List<CardDTO> getAllCards(@RequestParam Long userDeckId) {
+        return cardService.getAllCardsInUserDeck(userDeckId);
     }
 
     @GetMapping("/{id}")
@@ -31,16 +33,16 @@ public class CardController {
     }
 
     @PostMapping()
-    public Card createCard(@RequestBody CardRequestBody cardRequestBody) {
-        String hint = cardRequestBody.getHint();
-        String answer = cardRequestBody.getAnswer();
-        return cardService.createCard(hint, answer);
+    public Card createCard(@RequestBody CardCreationDTO requestBody, @RequestParam Long deckId) {
+        String hint = requestBody.getHint();
+        String answer = requestBody.getAnswer();
+        return cardService.createCard(hint, answer, deckId, 1l);
     }
 
     @PutMapping("/{id}")
-    public Card updateCard(@PathVariable Long id, @RequestBody CardRequestBody cardRequestBody) {
-        String hint = cardRequestBody.getHint();
-        String answer = cardRequestBody.getAnswer();
+    public Card updateCard(@PathVariable Long id, @RequestBody CardCreationDTO requestBody) {
+        String hint = requestBody.getHint();
+        String answer = requestBody.getAnswer();
         return cardService.updateCard(id, hint, answer);
     }
 
@@ -50,18 +52,19 @@ public class CardController {
     }
 
     @GetMapping("/allPossible")
-    public List<Card> getAllPossibleCards() {
-        return cardService.getAllPossibleCards();
+    public List<CardDTO> getAllPossibleCards(@RequestParam Long userDeckId) {
+        return cardService.getAllPossibleCards(userDeckId);
     }
 
     @GetMapping("/randomsr")
-    public ResponseEntity<Card> getRandomSR(@RequestParam Optional<Long> lastAnswered) {
+    public ResponseEntity<CardDTO> getRandomSR(@RequestParam Optional<Long> lastAnswered,
+            @RequestParam Long userDeckId) {
 
-        Optional<Card> card;
+        Optional<CardDTO> card;
         if (lastAnswered.isPresent()) {
-            card = cardService.getRandomCardSR(lastAnswered.get());
+            card = cardService.getRandomCardSR(lastAnswered.get(), userDeckId);
         } else {
-            card = cardService.getRandomCardSR();
+            card = cardService.getRandomCardSR(userDeckId);
         }
 
         if (card.isPresent()) {
@@ -72,12 +75,13 @@ public class CardController {
     }
 
     @PutMapping("/answer")
-    public void answerCard(@RequestParam Long id, @RequestBody Boolean isCorrect) {
-        cardService.updateCardStreak(id, isCorrect);
+    public void answerCard(@RequestParam Long cardId, @RequestParam Long userDeckId,
+            @RequestBody Boolean isCorrect) {
+        cardService.updateCardStreak(cardId, userDeckId, isCorrect);
     }
 
     @PutMapping("/reset")
-    public void resetCard(@RequestParam Long id) {
-        cardService.resetCard(id);
+    public void resetCard(@RequestParam Long cardId, @RequestParam Long userDeckId) {
+        cardService.resetCard(cardId, userDeckId);
     }
 }
