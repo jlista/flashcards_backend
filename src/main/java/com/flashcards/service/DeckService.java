@@ -13,7 +13,7 @@ import com.flashcards.repository.UserDeckRepository;
 @Service
 public class DeckService {
 
-    final static Logger logger = LoggerFactory.getLogger(CardService.class);
+    final static Logger logger = LoggerFactory.getLogger(DeckService.class);
 
     private final DeckRepository deckRepository;
     private final UserDeckRepository userDeckRepository;

@@ -10,13 +10,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
+
 
 @Service
 public class CardService {
@@ -64,11 +67,11 @@ public class CardService {
     }
 
 
-    public DeckCard getDeckCardById(Long cardId, Long deckId) {
+    public DeckCard getDeckCardById(Long cardId, Long userDeckId) {
         /**
          * Given an id string, find and return the card with that id.
          */
-        return deckCardRepository.findByCardAndDeckId(cardId, deckId)
+        return deckCardRepository.findByCardAndDeckId(cardId, userDeckId)
                 .orElseThrow(() -> new NoSuchElementException());
     }
 
@@ -183,6 +186,47 @@ public class CardService {
         return card;
     }
 
+   public Card migrateCard(String hint, String answer, String lastCorrect, int masteryLevel, int streak, Long deckId, long userId) {
+
+
+//     {
+//   "_id": {
+//     "$oid": "684cfc6a697072155c9ff399"
+//   },
+//   "hint": "Tyronism",
+//   "answer": "The state of being a beginner",
+//   "last_correct": {
+//     "$date": "2025-07-20T05:21:15.283Z"
+//   },
+//   "mastery_level": 3,
+//   "streak": 17,
+//   "_class": "com.flashcards.model.Card"
+// }
+        Timestamp timestamp = new Timestamp(0l);
+        try {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        Date parsedDate = df.parse(lastCorrect);
+        timestamp = new java.sql.Timestamp(parsedDate.getTime());
+        }catch(Exception e){
+            logger.info(e.getMessage());
+        }
+
+        Card card = cardRepository.save(new Card(hint, answer, deckId, userId));
+
+        List<Long> userDeckIds = deckRepository.getAssociatedUserDeckIds(deckId);
+
+        for (int i = 0; i < userDeckIds.size(); i++) {
+            DeckCard dc = new DeckCard(card.getCardId(), userDeckIds.get(i));
+            dc.setMasteryLevel(masteryLevel);
+            dc.setStreak(streak);
+            dc.setLastCorrect(timestamp);
+            deckCardRepository.save(dc);
+        }
+
+        logger.info("Created card: " + card.toString());
+        return card;
+    }
+
     public Card updateCard(Long id, String clue, String answer) {
         Card card = getCardById(id);
         card.setClue(clue);
@@ -192,8 +236,14 @@ public class CardService {
         return res;
     }
 
-    public void deleteCard(Long id) {
-        Card card = getCardById(id);
+    public void deleteCard(Long cardId, Long deckId) {
+
+        List<Long> uds = deckRepository.getAssociatedUserDeckIds(deckId);
+        logger.info(uds.toString());
+        List<DeckCard> dcs = uds.stream().map(ud -> getDeckCardById(cardId,ud)).toList();
+        logger.info(dcs.toString());
+        Card card = getCardById(cardId);
+        dcs.stream().forEach(dc -> deckCardRepository.delete(dc));
         cardRepository.delete(card);
         logger.info("Deleted card: " + card.toString());
     }
