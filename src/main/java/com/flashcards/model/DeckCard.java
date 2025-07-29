@@ -65,6 +65,18 @@ public class DeckCard {
         this.userDeckId = userDeckId;
     }
 
+    /**
+     * for testing only
+     * @param lastCorrect
+     * @param masteryLevel
+     * @param streak
+     */
+    public DeckCard(Timestamp lastCorrect, int masteryLevel, int streak){
+        this.lastCorrect = lastCorrect;
+        this.masteryLevel = masteryLevel;
+        this.streak = streak;
+    }
+
     public boolean getIsReadyToReview() {
 
         if (isFlagged || masteryLevel == 0) {
