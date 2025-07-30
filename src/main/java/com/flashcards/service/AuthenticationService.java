@@ -65,11 +65,10 @@ public class AuthenticationService {
     }
 
     public boolean isOwnerOrAdmin(Long userId){
-        // Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        // String username = auth.getName();
-        // AppUser currentUser = userRepository.findByUsername(username).get();
-        // logger.info(currentUser.toString());
-        // return currentUser.is_admin() || currentUser.getUserId().equals(userId);
-        return true;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        AppUser currentUser = userRepository.findByUsername(username).get();
+        logger.info(currentUser.toString());
+        return currentUser.is_admin() || currentUser.getUserId().equals(userId);
     }
 }

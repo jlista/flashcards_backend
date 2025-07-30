@@ -2,7 +2,6 @@ package com.flashcards.service;
 
 import com.flashcards.model.Card;
 import com.flashcards.model.DeckCard;
-import com.flashcards.model.UserDeck;
 import com.flashcards.model.DTO.CardDTO;
 import com.flashcards.repository.CardRepository;
 import com.flashcards.repository.DeckCardRepository;
@@ -11,7 +10,6 @@ import com.flashcards.repository.UserDeckRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.sql.Timestamp;

@@ -1,6 +1,6 @@
 package com.flashcards.controller;
 
-import com.flashcards.model.DTO.DeckCreationDTO;
+import com.flashcards.model.DTO.DeckDTO;
 import com.flashcards.model.DTO.UserDeckDTO;
 import com.flashcards.service.DeckService;
 import java.util.List;
@@ -23,11 +23,20 @@ public class DeckController {
     }
 
     @PostMapping()
-    public UserDeckDTO createDeck(@RequestBody DeckCreationDTO requestBody,
+    public UserDeckDTO createDeck(@RequestBody DeckDTO requestBody,
             @RequestParam Long userId) {
+                
         String deckName = requestBody.getName();
         String description = requestBody.getDescription();
         return deckService.createDeck(userId, deckName, description);
+    }
+
+    @PutMapping()
+    public DeckDTO updateDeck(@RequestBody DeckDTO requestBody,
+            @RequestParam Long deckId) {
+        String deckName = requestBody.getName();
+        String description = requestBody.getDescription();
+        return deckService.updateDeck(deckId, deckName, description);
     }
 }
 

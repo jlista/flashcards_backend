@@ -65,6 +65,9 @@ class CardServiceTest {
                 new UsernamePasswordAuthenticationToken(userDetails, null,
                         userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        AppUser testUser = new AppUser();
+        testUser.set_admin(true);
+        when(appUserRepository.findByUsername("test")).thenReturn(Optional.of(testUser));
     }
 
     @Test

@@ -19,8 +19,6 @@ public class UserService {
     }
 
     public Optional<AppUser> getUserId(String username) {
-        Optional<AppUser> foo = appUserRepository.findByUsername(username);
-        logger.info(foo.toString());
         return appUserRepository.findByUsername(username);
     }
 }

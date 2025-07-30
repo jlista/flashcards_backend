@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @AllArgsConstructor
-public class DeckCreationDTO implements Serializable {
+public class DeckDTO implements Serializable {
     private String name;
     private String description;
 }

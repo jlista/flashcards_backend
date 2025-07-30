@@ -25,6 +25,9 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 @Table(name = "deck_card")
+/**
+ * Associates a card with a UserDeck (and, by extension, with a user) and stores the user's statistics for that card
+ */
 public class DeckCard {
 
     @Id
