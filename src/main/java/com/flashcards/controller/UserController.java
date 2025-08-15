@@ -34,7 +34,7 @@ public class UserController {
     @GetMapping()
     public ResponseEntity<AppUser> getUser(@RequestParam String username) {
 
-        Optional<AppUser> user = userService.getUserId(username);
+        Optional<AppUser> user = userService.getUserByName(username);
 
         if (user.isPresent()) {
             return new ResponseEntity<>(user.get(), HttpStatus.OK);
