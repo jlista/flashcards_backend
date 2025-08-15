@@ -5,10 +5,15 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.security.Key;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class JwtService {
+    private final String COOKIE_NAME = "AUTH_TOKEN";
+
     @Value("${security.jwt.secret-key}")
     private String secretKey;
 
@@ -84,5 +91,24 @@ public class JwtService {
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public void setJwtCookie(String jwt, HttpServletResponse response){
+        response.addCookie(new Cookie(COOKIE_NAME, jwt));
+    }
+
+    public Optional<String> getJwtFromRequest(HttpServletRequest request){
+        try {
+            Optional<Cookie> cookie = Arrays.stream(request.getCookies())
+                                    .filter(c -> c.getName().equalsIgnoreCase(COOKIE_NAME))
+                                    .findFirst();
+
+            Cookie foo = cookie.get();
+            String f = foo.getAttribute(COOKIE_NAME);
+            return Optional.of(cookie.get().getValue());
+        } catch(Exception e) {
+         
+            return Optional.empty();   
+        }
     }
 }

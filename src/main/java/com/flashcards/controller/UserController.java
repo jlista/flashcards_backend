@@ -7,7 +7,8 @@ import com.flashcards.model.DTO.AppUserRegisterDTO;
 import com.flashcards.service.AuthenticationService;
 import com.flashcards.service.JwtService;
 import com.flashcards.service.UserService;
-
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+    private final String COOKIE_NAME = "AUTH_TOKEN";
 
     private final UserService userService;
     private final JwtService jwtService;
@@ -50,7 +52,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AppUserLoginResponseDTO> authenticate(@RequestBody AppUserLoginDTO appUserLoginDTO) {
+    public ResponseEntity<AppUserLoginResponseDTO> authenticate(@RequestBody AppUserLoginDTO appUserLoginDTO, HttpServletResponse response) {
         AppUser authenticatedUser = authenticationService.authenticate(appUserLoginDTO);
 
         String jwtToken = jwtService.generateToken(authenticatedUser);
@@ -60,6 +62,7 @@ public class UserController {
         AppUserLoginResponseDTO loginResponse =
                 new AppUserLoginResponseDTO(jwtToken, expiresIn, userId);
 
+        jwtService.setJwtCookie(jwtToken, response);
         return ResponseEntity.ok(loginResponse);
     }
 }
