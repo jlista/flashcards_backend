@@ -8,11 +8,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import java.util.List;
 
 @Configuration
@@ -35,8 +34,9 @@ public class SecurityConfig {
                 .disable()
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("api/users/signup","api/users/login")
+                .requestMatchers("/api/users/signup","/api/users/login")
                 .permitAll()
+                 .requestMatchers("/error").permitAll()
                 .anyRequest()
                 .authenticated()
             )
@@ -44,8 +44,9 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authenticationProvider(authenticationProvider)
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtAuthenticationFilter, AnonymousAuthenticationFilter.class)
             .cors(Customizer.withDefaults());
+            
 
         return http.build();
     }
@@ -57,6 +58,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of("http://localhost:8000"));
         configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 

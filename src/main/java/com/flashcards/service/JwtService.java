@@ -94,7 +94,13 @@ public class JwtService {
     }
 
     public void setJwtCookie(String jwt, HttpServletResponse response){
-        response.addCookie(new Cookie(COOKIE_NAME, jwt));
+        Cookie cookie = new Cookie(COOKIE_NAME, jwt);
+        cookie.setHttpOnly(true);      
+        cookie.setSecure(false);   
+        cookie.setPath("/api");
+        response.addHeader("Set-Cookie",
+        String.format("%s=%s; Path=/; HttpOnly; SameSite=Lax%s",
+                COOKIE_NAME, jwt, cookie.getSecure() ? "; Secure" : ""));
     }
 
     public Optional<String> getJwtFromRequest(HttpServletRequest request){
@@ -102,12 +108,8 @@ public class JwtService {
             Optional<Cookie> cookie = Arrays.stream(request.getCookies())
                                     .filter(c -> c.getName().equalsIgnoreCase(COOKIE_NAME))
                                     .findFirst();
-
-            Cookie foo = cookie.get();
-            String f = foo.getAttribute(COOKIE_NAME);
             return Optional.of(cookie.get().getValue());
         } catch(Exception e) {
-         
             return Optional.empty();   
         }
     }

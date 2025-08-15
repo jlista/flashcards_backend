@@ -18,7 +18,7 @@ public class UserService {
         this.appUserRepository = appUserRepository;
     }
 
-    public Optional<AppUser> getUserId(String username) {
+    public Optional<AppUser> getUserByName(String username) {
         return appUserRepository.findByUsername(username);
     }
 }
