@@ -19,6 +19,9 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Table(name = "user_deck")
+/***
+ * Associates a deck with a particular user
+ */
 public class UserDeck {
 
     @Id

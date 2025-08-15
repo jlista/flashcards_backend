@@ -3,9 +3,12 @@ package com.flashcards.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import com.flashcards.model.Deck;
 import com.flashcards.model.UserDeck;
+import com.flashcards.model.DTO.DeckDTO;
 import com.flashcards.model.DTO.UserDeckDTO;
 import com.flashcards.repository.DeckRepository;
 import com.flashcards.repository.UserDeckRepository;
@@ -13,22 +16,41 @@ import com.flashcards.repository.UserDeckRepository;
 @Service
 public class DeckService {
 
-    final static Logger logger = LoggerFactory.getLogger(CardService.class);
+    final static Logger logger = LoggerFactory.getLogger(DeckService.class);
 
     private final DeckRepository deckRepository;
     private final UserDeckRepository userDeckRepository;
+    
+    private final AuthenticationService authenticationService;
 
-    public DeckService(DeckRepository deckRepository, UserDeckRepository userDeckRepository) {
+    public DeckService(DeckRepository deckRepository, UserDeckRepository userDeckRepository, AuthenticationService authenticationService) {
 
         this.deckRepository = deckRepository;
         this.userDeckRepository = userDeckRepository;
+        this.authenticationService = authenticationService;
     }
 
+    /**
+     * Get all UserDecks associated with a given user ID
+     * @param userId
+     * @return
+     */
     public List<UserDeckDTO> getUserDecks(Long userId) {
         return userDeckRepository.findByOwnedBy(userId);
     }
 
+    /**
+     * Creates a Deck object, and then creates a UserDeck object associating the new deck with the user who created it
+     * @param userId the id of the user who will own the deck
+     * @param name name of the deck
+     * @param description description of the deck
+     * @return 
+     */
     public UserDeckDTO createDeck(Long userId, String name, String description) {
+        
+        if (!authenticationService.isOwnerOrAdmin(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
         Deck deck = new Deck();
         deck.setDeckName(name);
         deck.setDescription(description);
@@ -40,5 +62,27 @@ public class DeckService {
         ud.setOwnedBy(userId);
         userDeckRepository.save(ud);
         return new UserDeckDTO(ud.getUserDeckId(), deckId, userId, name, description);
+    }
+
+    /**
+     * Updates the name and description of a given deck
+     * 
+     * @param deckId the id of the deck to update
+     * @param name
+     * @param description
+     * @return a DTO containing the updated name and description
+     */
+    public DeckDTO updateDeck(Long deckId, String name, String description) {
+        Deck deck = deckRepository.getReferenceById(deckId);
+
+        if (!authenticationService.isOwnerOrAdmin(deck.getOwnedBy())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        deck.setDeckName(name);
+        deck.setDescription(description);
+        deckRepository.save(deck);
+       
+        return new DeckDTO(name, description);
     }
 }

@@ -25,6 +25,9 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 @Table(name = "deck_card")
+/**
+ * Associates a card with a UserDeck (and, by extension, with a user) and stores the user's statistics for that card
+ */
 public class DeckCard {
 
     @Id
@@ -63,6 +66,18 @@ public class DeckCard {
     public DeckCard(long cardId, long userDeckId) {
         this.cardId = cardId;
         this.userDeckId = userDeckId;
+    }
+
+    /**
+     * for testing only
+     * @param lastCorrect
+     * @param masteryLevel
+     * @param streak
+     */
+    public DeckCard(Timestamp lastCorrect, int masteryLevel, int streak){
+        this.lastCorrect = lastCorrect;
+        this.masteryLevel = masteryLevel;
+        this.streak = streak;
     }
 
     public boolean getIsReadyToReview() {

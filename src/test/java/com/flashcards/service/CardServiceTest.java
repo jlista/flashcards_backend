@@ -1,14 +1,22 @@
 package com.flashcards.service;
 
+import com.flashcards.model.AppUser;
 import com.flashcards.model.Card;
 import com.flashcards.model.DeckCard;
+import com.flashcards.model.UserDeck;
 import com.flashcards.model.DTO.CardDTO;
+import com.flashcards.repository.AppUserRepository;
 import com.flashcards.repository.CardRepository;
 import com.flashcards.repository.DeckCardRepository;
 import com.flashcards.repository.DeckRepository;
 import com.flashcards.repository.UserDeckRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -27,7 +35,15 @@ class CardServiceTest {
     private DeckRepository deckRepository;
     private DeckCardRepository deckCardRepository;
     private UserDeckRepository userDeckRepository;
+    private AppUserRepository appUserRepository;
+    private AuthenticationService authService;
     private CardService cardService;
+
+
+    @AfterEach
+    public void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     @BeforeEach
     void setUp() {
@@ -35,14 +51,34 @@ class CardServiceTest {
         deckRepository = mock(DeckRepository.class);
         deckCardRepository = mock(DeckCardRepository.class);
         userDeckRepository = mock(UserDeckRepository.class);
-        cardService = new CardService(cardRepository, deckCardRepository, deckRepository);
+        appUserRepository = mock(AppUserRepository.class);
+        authService = new AuthenticationService(appUserRepository, null, null);
+        cardService = new CardService(cardRepository, deckCardRepository, deckRepository,
+                userDeckRepository, authService);
+    }
+
+    private void setupAuthenticationTest() {
+        AppUser userDetails = new AppUser();
+        userDetails.setUserId(1l);
+        userDetails.setUsername("test");
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(userDetails, null,
+                        userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        AppUser testUser = new AppUser();
+        testUser.set_admin(true);
+        when(appUserRepository.findByUsername("test")).thenReturn(Optional.of(testUser));
     }
 
     @Test
+    @ExtendWith(MockitoExtension.class)
     void testGetAllCards() {
+        setupAuthenticationTest();
+
         List<CardDTO> mockCards = Arrays.asList(new CardDTO("Clue", "Answer", 0, 0, null));
 
         when(cardRepository.getAllCardsInUserDeck(1l)).thenReturn(mockCards);
+        when(userDeckRepository.findOwner(1l)).thenReturn(Optional.of(1l));
 
         List<CardDTO> result = cardService.getAllCardsInUserDeck(1l);
 
@@ -52,6 +88,7 @@ class CardServiceTest {
 
     @Test
     void testGetCardByIdFound() {
+        setupAuthenticationTest();
         Card card = new Card("Front", "Back", 1l, 1l);
         card.setCardId(123L);
 
@@ -65,7 +102,7 @@ class CardServiceTest {
 
     @Test
     void testGetCardByIdNotFound() {
-
+        setupAuthenticationTest();
         assertThrows(NoSuchElementException.class, () -> {
             cardService.getCardById(123L);
         });
@@ -73,6 +110,7 @@ class CardServiceTest {
 
     @Test
     void testGetRandomCards() {
+        setupAuthenticationTest();
         Timestamp daysAgo0 = Timestamp.from(Instant.now().minus(0, ChronoUnit.DAYS));
         Timestamp daysAgo1 = Timestamp.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
@@ -84,6 +122,7 @@ class CardServiceTest {
         List<CardDTO> mockCards = Arrays.asList(card1, card2);
 
         when(cardRepository.getAllCardsInUserDeck(1l)).thenReturn(mockCards);
+        when(userDeckRepository.findOwner(1l)).thenReturn(Optional.of(1l));
 
         // Assuming we just answered card 0, the only valid choice is 1 since 0 would be twice in a
         // row
@@ -93,14 +132,15 @@ class CardServiceTest {
 
     @Test
     void testUpdateCardStreakIncorrect() {
-
+        setupAuthenticationTest();
         Timestamp startDate = Timestamp.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
-        DeckCard dc = new DeckCard(0l, 0l, startDate, 2, 1, false, null);
+        DeckCard dc = new DeckCard(0l, 1l, startDate, 2, 1, false, null);
 
-        when(deckCardRepository.findByCardAndDeckId(0l, 0l)).thenReturn(Optional.of(dc));
+        when(deckCardRepository.findByCardAndDeckId(0l, 1l)).thenReturn(Optional.of(dc));
+        when(userDeckRepository.findOwner(1l)).thenReturn(Optional.of(1l));
 
-        cardService.updateCardStreak(0l, 0l, false);
+        cardService.updateCardStreak(0l, 1l, false);
 
         assertEquals(0, dc.getStreak());
         assertEquals(1, dc.getMasteryLevel());
@@ -109,14 +149,14 @@ class CardServiceTest {
 
     @Test
     void testUpdateCardStreakCorrect() {
-
+        setupAuthenticationTest();
         Timestamp startDate = Timestamp.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
-        DeckCard dc = new DeckCard(0l, 0l, startDate, 1, 1, false, null);
+        DeckCard dc = new DeckCard(0l, 1l, startDate, 1, 1, false, null);
 
-        when(deckCardRepository.findByCardAndDeckId(0l, 0l)).thenReturn(Optional.of(dc));
-
-        cardService.updateCardStreak(0l, 0l, true);
+        when(deckCardRepository.findByCardAndDeckId(0l, 1l)).thenReturn(Optional.of(dc));
+        when(userDeckRepository.findOwner(1l)).thenReturn(Optional.of(1l));
+        cardService.updateCardStreak(0l, 1l, true);
 
         assertEquals(2, dc.getStreak());
         assertEquals(1, dc.getMasteryLevel());
@@ -125,14 +165,14 @@ class CardServiceTest {
 
     @Test
     void testUpdateCardStreakLevelUp() {
-
+        setupAuthenticationTest();
         Timestamp startDate = Timestamp.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
-        DeckCard dc = new DeckCard(0l, 0l, startDate, 1, 4, false, null);
+        DeckCard dc = new DeckCard(0l, 1l, startDate, 1, 4, false, null);
 
-        when(deckCardRepository.findByCardAndDeckId(0l, 0l)).thenReturn(Optional.of(dc));
-
-        cardService.updateCardStreak(0l, 0l, true);
+        when(deckCardRepository.findByCardAndDeckId(0l, 1l)).thenReturn(Optional.of(dc));
+        when(userDeckRepository.findOwner(1l)).thenReturn(Optional.of(1l));
+        cardService.updateCardStreak(0l, 1l, true);
 
         assertEquals(5, dc.getStreak());
         assertEquals(2, dc.getMasteryLevel());
@@ -141,18 +181,17 @@ class CardServiceTest {
 
     // @Test
     // void testIsCardReady() {
-    // Date today = Date.from(Instant.now().minus(0, ChronoUnit.DAYS));
-    // Date yesterday = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+    //     Timestamp today = Timestamp.from(Instant.now().minus(0, ChronoUnit.DAYS));
+    //     Timestamp yesterday = Timestamp.from(Instant.now().minus(1, ChronoUnit.DAYS));
 
-    // Card card1 = new Card("hint", "answer", today, 0, 0);
-    // Card card2 = new Card("hint", "answer", today, 1, 5);
-    // Card card3 = new Card("hint", "answer", yesterday, 0, 0);
-    // Card card4 = new Card("hint", "answer", yesterday, 1, 5);
+    //     DeckCard card1 = new DeckCard(today, 0, 0);
+    //     DeckCard card2 = new DeckCard(today, 1, 5);
+    //     DeckCard card3 = new DeckCard(yesterday, 0, 0);
+    //     DeckCard card4 = new DeckCard(yesterday, 1, 5);
 
-    // assertEquals(true, card1.getIsReadyToReview());
-    // assertEquals(false, card2.getIsReadyToReview());
-    // assertEquals(true, card3.getIsReadyToReview());
-    // assertEquals(true, card4.getIsReadyToReview());
-
+    //     assertEquals(true, card1.getIsReadyToReview());
+    //     assertEquals(false, card2.getIsReadyToReview());
+    //     assertEquals(true, card3.getIsReadyToReview());
+    //     assertEquals(true, card4.getIsReadyToReview());
     // }
 }

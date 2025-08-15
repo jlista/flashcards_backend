@@ -3,6 +3,7 @@ package com.flashcards.repository;
 import com.flashcards.model.Card;
 import com.flashcards.model.DTO.CardDTO;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,5 +21,10 @@ public interface CardRepository extends JpaRepository<Card, Long> {
                      + "FROM Card c JOIN DeckCard d ON c.cardId = d.cardId "
                      + "WHERE d.userDeckId = :id")
        List<CardDTO> getAllCardsInUserDeck(@Param("id") Long userDeckId);
+
+       @Query("Select c.ownedBy "
+              + "FROM Card c "
+              + "WHERE c.cardId = :cardId")
+       public Optional<Long> findOwner(@Param("cardId") long cardId);
 
 }

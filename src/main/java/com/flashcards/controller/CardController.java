@@ -2,6 +2,7 @@ package com.flashcards.controller;
 
 import com.flashcards.model.Card;
 import com.flashcards.model.DTO.CardDTO;
+import com.flashcards.model.DTO.CardMigrationDTO;
 import com.flashcards.model.DTO.CardCreationDTO;
 import com.flashcards.service.CardService;
 import com.flashcards.service.DeckService;
@@ -33,11 +34,23 @@ public class CardController {
     }
 
     @PostMapping()
-    public Card createCard(@RequestBody CardCreationDTO requestBody, @RequestParam Long deckId) {
+    public Card createCard(@RequestBody CardCreationDTO requestBody, @RequestParam Long deckId, @RequestParam Long userId) {
         String hint = requestBody.getHint();
         String answer = requestBody.getAnswer();
-        return cardService.createCard(hint, answer, deckId, 1l);
+        return cardService.createCard(hint, answer, deckId, userId);
     }
+
+    
+    @PostMapping("/migrate")
+    public Card migrateCard(@RequestBody CardMigrationDTO requestBody, @RequestParam Long deckId, @RequestParam Long userId) {
+        String hint = requestBody.getHint();
+        String answer = requestBody.getAnswer();
+        int masteryLevel = requestBody.getMasteryLevel();
+        int streak = requestBody.getStreak();
+        String lastCorrect = requestBody.getLastCorrect();
+        return cardService.migrateCard(hint, answer, lastCorrect, masteryLevel, streak, deckId, userId);
+    }
+
 
     @PutMapping("/{id}")
     public Card updateCard(@PathVariable Long id, @RequestBody CardCreationDTO requestBody) {
@@ -47,8 +60,8 @@ public class CardController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteCard(@PathVariable Long id) {
-        cardService.deleteCard(id);
+    public void deleteCard(@PathVariable Long id, @RequestParam Long deckId){
+        cardService.deleteCard(id, deckId);
     }
 
     @GetMapping("/allPossible")

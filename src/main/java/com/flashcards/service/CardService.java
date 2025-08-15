@@ -6,17 +6,23 @@ import com.flashcards.model.DTO.CardDTO;
 import com.flashcards.repository.CardRepository;
 import com.flashcards.repository.DeckCardRepository;
 import com.flashcards.repository.DeckRepository;
+import com.flashcards.repository.UserDeckRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
+
 
 @Service
 public class CardService {
@@ -26,16 +32,30 @@ public class CardService {
     private final CardRepository cardRepository;
     private final DeckCardRepository deckCardRepository;
     private final DeckRepository deckRepository;
+    private final UserDeckRepository userDeckRepository;
+    private final AuthenticationService authenticationService;
 
     public CardService(CardRepository cardRepository, DeckCardRepository deckCardRepository,
-            DeckRepository deckRepository) {
+            DeckRepository deckRepository, UserDeckRepository userDeckRepository, AuthenticationService authenticationService) {
         this.cardRepository = cardRepository;
         this.deckCardRepository = deckCardRepository;
         this.deckRepository = deckRepository;
+        this.userDeckRepository = userDeckRepository;
+        this.authenticationService = authenticationService;
     }
 
     public List<CardDTO> getAllCardsInUserDeck(Long userDeckId) {
+
+        Optional<Long> owner = userDeckRepository.findOwner(userDeckId);
+
+        System.out.println(owner.isPresent());
+        System.out.println(authenticationService.isOwnerOrAdmin(owner.get()));
+        if (!owner.isPresent() || !authenticationService.isOwnerOrAdmin(owner.get())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
         List<CardDTO> allCards = cardRepository.getAllCardsInUserDeck(userDeckId);
+
         List<CardDTO> readyCards =
                 allCards.stream().filter(c -> c.getIsReadyToReview()).collect(Collectors.toList());
         List<CardDTO> notReadyCards =
@@ -45,17 +65,6 @@ public class CardService {
         return readyCards;
     }
 
-    // public List<Card> getAllCards() {
-    // List<Card> allCards = cardRepository.findAll();
-    // List<Card> readyCards =
-    // allCards.stream().filter(c -> c.getIsReadyToReview()).collect(Collectors.toList());
-    // List<Card> notReadyCards =
-    // allCards.stream().filter(c -> !c.getIsReadyToReview()).collect(Collectors.toList());
-    // readyCards.addAll(notReadyCards);
-
-    // return readyCards;
-    // }
-
     public Card getCardById(Long id) {
         /**
          * Given an id string, find and return the card with that id.
@@ -64,11 +73,16 @@ public class CardService {
     }
 
 
-    public DeckCard getDeckCardById(Long cardId, Long deckId) {
+    public DeckCard getDeckCardById(Long cardId, Long userDeckId) {
         /**
          * Given an id string, find and return the card with that id.
          */
-        return deckCardRepository.findByCardAndDeckId(cardId, deckId)
+        Optional<Long> owner = userDeckRepository.findOwner(userDeckId);
+
+        if (!owner.isPresent() || !authenticationService.isOwnerOrAdmin(owner.get())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+        return deckCardRepository.findByCardAndDeckId(cardId, userDeckId)
                 .orElseThrow(() -> new NoSuchElementException());
     }
 
@@ -151,6 +165,12 @@ public class CardService {
          * @param card the card to update
          * @param isCorrect whether or not the user answered correctly
          */
+        Optional<Long> owner = userDeckRepository.findOwner(userDeckId);
+
+        if (!owner.isPresent() || !authenticationService.isOwnerOrAdmin(owner.get())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
         DeckCard card = getDeckCardById(cardId, userDeckId);
         int mastery_level = card.getMasteryLevel();
 
@@ -176,6 +196,12 @@ public class CardService {
         List<Long> userDeckIds = deckRepository.getAssociatedUserDeckIds(deckId);
 
         for (int i = 0; i < userDeckIds.size(); i++) {
+            Long userDeckId = userDeckIds.get(i);
+            Optional<Long> owner = userDeckRepository.findOwner(userDeckId);
+
+            if (!owner.isPresent() || !authenticationService.isOwnerOrAdmin(owner.get())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+            }
             deckCardRepository.save(new DeckCard(card.getCardId(), userDeckIds.get(i)));
         }
 
@@ -183,7 +209,41 @@ public class CardService {
         return card;
     }
 
+   @Deprecated
+   public Card migrateCard(String hint, String answer, String lastCorrect, int masteryLevel, int streak, Long deckId, long userId) {
+
+        Timestamp timestamp = new Timestamp(0l);
+        try {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        Date parsedDate = df.parse(lastCorrect);
+        timestamp = new java.sql.Timestamp(parsedDate.getTime());
+        }catch(Exception e){
+            logger.info(e.getMessage());
+        }
+
+        Card card = cardRepository.save(new Card(hint, answer, deckId, userId));
+
+        List<Long> userDeckIds = deckRepository.getAssociatedUserDeckIds(deckId);
+
+        for (int i = 0; i < userDeckIds.size(); i++) {
+            DeckCard dc = new DeckCard(card.getCardId(), userDeckIds.get(i));
+            dc.setMasteryLevel(masteryLevel);
+            dc.setStreak(streak);
+            dc.setLastCorrect(timestamp);
+            deckCardRepository.save(dc);
+        }
+
+        logger.info("Created card: " + card.toString());
+        return card;
+    }
+
     public Card updateCard(Long id, String clue, String answer) {
+
+        Optional<Long> owner = cardRepository.findOwner(id);
+        if (!owner.isPresent() || !authenticationService.isOwnerOrAdmin(owner.get())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+        
         Card card = getCardById(id);
         card.setClue(clue);
         card.setAnswer(answer);
@@ -192,13 +252,31 @@ public class CardService {
         return res;
     }
 
-    public void deleteCard(Long id) {
-        Card card = getCardById(id);
+    public void deleteCard(Long cardId, Long deckId) {
+
+        Optional<Long> owner = cardRepository.findOwner(cardId);
+        if (!owner.isPresent() || !authenticationService.isOwnerOrAdmin(owner.get())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        // TODO once decks can be shared, do not allow a card to be deleted if its main deck is public
+
+        List<Long> uds = deckRepository.getAssociatedUserDeckIds(deckId);
+        logger.info(uds.toString());
+        List<DeckCard> dcs = uds.stream().map(ud -> getDeckCardById(cardId,ud)).toList();
+        logger.info(dcs.toString());
+        Card card = getCardById(cardId);
+        dcs.stream().forEach(dc -> deckCardRepository.delete(dc));
         cardRepository.delete(card);
         logger.info("Deleted card: " + card.toString());
     }
 
     public void resetCard(Long cardId, Long deckId) {
+
+        Optional<Long> owner = cardRepository.findOwner(cardId);
+        if (!owner.isPresent() || !authenticationService.isOwnerOrAdmin(owner.get())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
         DeckCard card = getDeckCardById(cardId, deckId);
         card.setLastCorrect(null);
         card.setMasteryLevel(0);

@@ -1,6 +1,5 @@
 package com.flashcards.model.DTO;
 
-import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +7,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @AllArgsConstructor
-public class DeckCreationDTO implements Serializable {
-    private String name;
-    private String description;
+public class AppUserLoginDTO {
+    private String username;
+    private String password;
 }
