@@ -1,7 +1,9 @@
 package com.flashcards.service;
 
 import com.flashcards.model.Card;
+import com.flashcards.model.Deck;
 import com.flashcards.model.DeckCard;
+import com.flashcards.model.UserDeck;
 import com.flashcards.model.DTO.CardDTO;
 import com.flashcards.repository.CardRepository;
 import com.flashcards.repository.DeckCardRepository;
@@ -191,19 +193,25 @@ public class CardService {
 
     public Card createCard(String clue, String answer, Long deckId, Long userId) {
 
-        Card card = cardRepository.save(new Card(clue, answer, deckId, userId));
+        Deck deck = deckRepository.getReferenceById(deckId);
+        if (deck.isPublic()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot add a card to a public deck");
+        }
 
         List<Long> userDeckIds = deckRepository.getAssociatedUserDeckIds(deckId);
-
-        for (int i = 0; i < userDeckIds.size(); i++) {
-            Long userDeckId = userDeckIds.get(i);
-            Optional<Long> owner = userDeckRepository.findOwner(userDeckId);
-
-            if (!owner.isPresent() || !authenticationService.isOwnerOrAdmin(owner.get())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
-            }
-            deckCardRepository.save(new DeckCard(card.getCardId(), userDeckIds.get(i)));
+        if (userDeckIds.size() != 1) {
+            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "Deck must be associated with exactly one user to add a card");
         }
+
+        Long userDeckId = userDeckIds.get(0);
+        Optional<Long> owner = userDeckRepository.findOwner(userDeckId);
+
+        if (!owner.isPresent() || !authenticationService.isOwnerOrAdmin(owner.get())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+        
+        Card card = cardRepository.save(new Card(clue, answer, deckId, userId));
+        deckCardRepository.save(new DeckCard(card.getCardId(), userDeckId));
 
         logger.info("Created card: " + card.toString());
         return card;
@@ -243,8 +251,14 @@ public class CardService {
         if (!owner.isPresent() || !authenticationService.isOwnerOrAdmin(owner.get())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
         }
-        
+
         Card card = getCardById(id);
+        long deckId = card.getDeckId();
+        Deck deck = deckRepository.getReferenceById(deckId);
+        if (deck.isPublic()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot modify a card in a public deck");
+        }
+
         card.setClue(clue);
         card.setAnswer(answer);
         Card res = cardRepository.save(card);
@@ -254,35 +268,62 @@ public class CardService {
 
     public void deleteCard(Long cardId, Long deckId) {
 
-        Optional<Long> owner = cardRepository.findOwner(cardId);
-        if (!owner.isPresent() || !authenticationService.isOwnerOrAdmin(owner.get())) {
+        Card card = getCardById(cardId);
+        Long owner = card.getOwnedBy();
+        if (!authenticationService.isOwnerOrAdmin(owner)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
         }
 
-        // TODO once decks can be shared, do not allow a card to be deleted if its main deck is public
+        Deck deck = deckRepository.getReferenceById(deckId);
+        if (deck.isPublic()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete a card in a public deck");
+        }
 
         List<Long> uds = deckRepository.getAssociatedUserDeckIds(deckId);
         logger.info(uds.toString());
         List<DeckCard> dcs = uds.stream().map(ud -> getDeckCardById(cardId,ud)).toList();
         logger.info(dcs.toString());
-        Card card = getCardById(cardId);
         dcs.stream().forEach(dc -> deckCardRepository.delete(dc));
         cardRepository.delete(card);
         logger.info("Deleted card: " + card.toString());
     }
 
-    public void resetCard(Long cardId, Long deckId) {
+    public void resetCard(Long cardId, Long userDeckId) {
 
+        // TODO - this should be based on whether the user owns the userdeck associated with the card
         Optional<Long> owner = cardRepository.findOwner(cardId);
         if (!owner.isPresent() || !authenticationService.isOwnerOrAdmin(owner.get())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
         }
-        DeckCard card = getDeckCardById(cardId, deckId);
+        DeckCard card = getDeckCardById(cardId, userDeckId);
         card.setLastCorrect(null);
         card.setMasteryLevel(0);
         card.setStreak(0);
         deckCardRepository.save(card);
     }
 
+    /**
+     * given ids of a public Deck and UserDeck, create a DeckCard instance of DeckCard for each Card in the Deck
+     * and associate it with the given UserDeck.
+     * 
+     * @param deckId
+     * @param userDeckId
+     */
+    protected void copyCardsToUserDeck(Long deckId, Long userDeckId) {
+
+        UserDeck ud = userDeckRepository.getReferenceById(userDeckId);
+        List<Card> cards = cardRepository.getAllCardsInDeck(deckId);
+
+        if (!authenticationService.isOwnerOrAdmin(ud.getOwnedBy())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        ArrayList<DeckCard> dcs = new ArrayList<DeckCard>();
+        for (int i = 0; i < cards.size(); i++){
+            Card c = cards.get(i);
+            dcs.add(new DeckCard(c.getCardId(), userDeckId));
+        }
+        deckCardRepository.saveAllAndFlush(dcs);
+    }
 
 }

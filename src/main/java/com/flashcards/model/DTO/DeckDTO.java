@@ -11,4 +11,5 @@ import lombok.Setter;
 public class DeckDTO implements Serializable {
     private String name;
     private String description;
+    private boolean isPublic;
 }

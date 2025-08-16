@@ -31,6 +31,8 @@ public class Deck {
     private String description;
     @Column(name = "owned_by", nullable = false, unique = false)
     private Long ownedBy;
+    @Column(name = "is_public", nullable = false, unique = false)
+    private boolean isPublic;
     @Column(name = "created", nullable = false, unique = false)
     @CreationTimestamp
     private Timestamp created;
