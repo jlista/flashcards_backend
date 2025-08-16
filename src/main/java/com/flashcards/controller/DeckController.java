@@ -2,6 +2,7 @@ package com.flashcards.controller;
 
 import com.flashcards.model.DTO.DeckDTO;
 import com.flashcards.model.DTO.UserDeckDTO;
+import com.flashcards.service.DeckCardService;
 import com.flashcards.service.DeckService;
 import java.util.List;
 
@@ -12,9 +13,11 @@ import org.springframework.web.bind.annotation.*;
 public class DeckController {
 
     private final DeckService deckService;
+    private final DeckCardService deckCardService;
 
-    public DeckController(DeckService deckService) {
+    public DeckController(DeckService deckService, DeckCardService deckCardService) {
         this.deckService = deckService;
+        this.deckCardService = deckCardService;
     }
 
     @GetMapping("/userdecks")
@@ -37,6 +40,16 @@ public class DeckController {
         String deckName = requestBody.getName();
         String description = requestBody.getDescription();
         return deckService.updateDeck(deckId, deckName, description);
+    }
+
+    @PostMapping("/copy")
+    public void copyDeck(@RequestParam Long deckId, @RequestParam Long userId){
+        deckCardService.copyDeckAndCards(deckId, userId);
+    }
+
+    @PutMapping("/share")
+    public void shareDeck(@RequestParam Long deckId){
+        deckService.setDeckPublic(deckId);
     }
 }
 

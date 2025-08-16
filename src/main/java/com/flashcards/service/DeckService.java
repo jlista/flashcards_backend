@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import com.flashcards.model.Card;
 import com.flashcards.model.Deck;
 import com.flashcards.model.UserDeck;
 import com.flashcards.model.DTO.DeckDTO;
@@ -55,13 +56,14 @@ public class DeckService {
         deck.setDeckName(name);
         deck.setDescription(description);
         deck.setOwnedBy(userId);
+        deck.setPublic(false);
         deckRepository.save(deck);
         long deckId = deck.getDeckId();
         UserDeck ud = new UserDeck();
         ud.setDeckId(deckId);
         ud.setOwnedBy(userId);
         userDeckRepository.save(ud);
-        return new UserDeckDTO(ud.getUserDeckId(), deckId, userId, name, description);
+        return new UserDeckDTO(ud.getUserDeckId(), deckId, userId, name, description, false);
     }
 
     /**
@@ -75,6 +77,10 @@ public class DeckService {
     public DeckDTO updateDeck(Long deckId, String name, String description) {
         Deck deck = deckRepository.getReferenceById(deckId);
 
+        if (deck.isPublic()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update a public deck");
+        }
+
         if (!authenticationService.isOwnerOrAdmin(deck.getOwnedBy())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
         }
@@ -83,6 +89,47 @@ public class DeckService {
         deck.setDescription(description);
         deckRepository.save(deck);
        
-        return new DeckDTO(name, description);
+        return new DeckDTO(name, description, deck.isPublic());
+    }
+
+    /**
+     * Sets the isPublic flag to true, allowing a deck to be shared with other users
+     * 
+     * @param deckId the id of the deck to update
+     */
+    public void setDeckPublic(Long deckId) {
+
+        Deck deck = deckRepository.getReferenceById(deckId);
+
+        if (!authenticationService.isOwnerOrAdmin(deck.getOwnedBy())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        deck.setPublic(true);
+        deckRepository.save(deck);
+    }
+
+    /**
+     * Given a user ID and deck ID, creates a UserDeck object allowing that user to
+     * use their own version of the deck.
+     * 
+     * @param deckId (must be a public deck)
+     * @param userId
+     * 
+     * @return the UserDeck that was created
+     */
+    protected UserDeck copyDeckForUser(Long deckId, Long userId){
+        Deck deck = deckRepository.getReferenceById(deckId);
+        
+        // only allow copying a deck if it is public or owned by the current user
+        if (!deck.isPublic() && !authenticationService.isOwnerOrAdmin(deck.getOwnedBy())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        UserDeck ud = new UserDeck();
+        ud.setDeckId(deckId);
+        ud.setOwnedBy(userId);
+        
+        return userDeckRepository.save(ud);
     }
 }
