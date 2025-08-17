@@ -1,5 +1,7 @@
 package com.flashcards.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +91,7 @@ public class DeckService {
         deck.setDescription(description);
         deckRepository.save(deck);
        
-        return new DeckDTO(name, description, deck.isPublic());
+        return new DeckDTO(deck.getDeckId(), name, description, deck.isPublic());
     }
 
     /**
@@ -131,5 +133,17 @@ public class DeckService {
         ud.setOwnedBy(userId);
         
         return userDeckRepository.save(ud);
+    }
+
+    public List<DeckDTO> getPublicDecks(){
+        return deckRepository.getPublicDecks(); 
+    }
+
+    public List<DeckDTO> getPublicDecksNotOwned(Long userId){
+        if (!authenticationService.isOwnerOrAdmin(userId)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        return deckRepository.getPublicDecksNotOwned(userId);
     }
 }

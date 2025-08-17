@@ -51,5 +51,10 @@ public class DeckController {
     public void shareDeck(@RequestParam Long deckId){
         deckService.setDeckPublic(deckId);
     }
+
+    @GetMapping("/public")
+    public List<DeckDTO> getPublicDecks(@RequestParam Long userId){
+        return deckService.getPublicDecksNotOwned(userId);
+    }
 }
 
