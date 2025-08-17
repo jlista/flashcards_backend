@@ -9,6 +9,7 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 public class DeckDTO implements Serializable {
+    private Long deckId;
     private String name;
     private String description;
     private boolean isPublic;

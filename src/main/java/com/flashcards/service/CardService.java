@@ -319,8 +319,7 @@ public class CardService {
         }
 
         ArrayList<DeckCard> dcs = new ArrayList<DeckCard>();
-        for (int i = 0; i < cards.size(); i++){
-            Card c = cards.get(i);
+        for (Card c: cards){
             dcs.add(new DeckCard(c.getCardId(), userDeckId));
         }
         deckCardRepository.saveAllAndFlush(dcs);
