@@ -37,13 +37,17 @@ public class CardService {
     private final UserDeckRepository userDeckRepository;
     private final AuthenticationService authenticationService;
 
+    private final StatisticService statisticService;
+
     public CardService(CardRepository cardRepository, DeckCardRepository deckCardRepository,
-            DeckRepository deckRepository, UserDeckRepository userDeckRepository, AuthenticationService authenticationService) {
+            DeckRepository deckRepository, UserDeckRepository userDeckRepository, AuthenticationService authenticationService,
+            StatisticService statisticService) {
         this.cardRepository = cardRepository;
         this.deckCardRepository = deckCardRepository;
         this.deckRepository = deckRepository;
         this.userDeckRepository = userDeckRepository;
         this.authenticationService = authenticationService;
+        this.statisticService = statisticService;
     }
 
     public List<CardDTO> getAllCardsInUserDeck(Long userDeckId) {
@@ -189,6 +193,8 @@ public class CardService {
             card.setLastCorrect(now);
         }
         deckCardRepository.save(card);
+
+        statisticService.updateDailyStats(owner.get(), isCorrect);
     }
 
     public Card createCard(String clue, String answer, Long deckId, Long userId) {
