@@ -20,4 +20,10 @@ public interface UserDeckRepository extends JpaRepository<UserDeck, Long> {
             + "FROM UserDeck ud "
             + "WHERE ud.userDeckId = :userDeckId")
     public Optional<Long> findOwner(@Param("userDeckId") long userDeckId);
+
+    @Query("SELECT new com.flashcards.model.DTO.UserDeckDTO(ud.userDeckId, ud.deckId, ud.ownedBy, d.deckName, d.description, d.isPublic) "
+            + "FROM Deck d JOIN UserDeck ud ON ud.deckId = d.deckId "
+            + "WHERE ud.ownedBy = :userId AND ud.deckId = :deckId")
+    public Optional<UserDeckDTO> findByUserAndDeck(@Param("userId") Long userId, @Param("deckId") Long deckId);
+
 }

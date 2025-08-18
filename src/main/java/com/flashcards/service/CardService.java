@@ -37,13 +37,17 @@ public class CardService {
     private final UserDeckRepository userDeckRepository;
     private final AuthenticationService authenticationService;
 
+    private final StatisticService statisticService;
+
     public CardService(CardRepository cardRepository, DeckCardRepository deckCardRepository,
-            DeckRepository deckRepository, UserDeckRepository userDeckRepository, AuthenticationService authenticationService) {
+            DeckRepository deckRepository, UserDeckRepository userDeckRepository, AuthenticationService authenticationService,
+            StatisticService statisticService) {
         this.cardRepository = cardRepository;
         this.deckCardRepository = deckCardRepository;
         this.deckRepository = deckRepository;
         this.userDeckRepository = userDeckRepository;
         this.authenticationService = authenticationService;
+        this.statisticService = statisticService;
     }
 
     public List<CardDTO> getAllCardsInUserDeck(Long userDeckId) {
@@ -189,6 +193,8 @@ public class CardService {
             card.setLastCorrect(now);
         }
         deckCardRepository.save(card);
+
+        statisticService.updateDailyStats(owner.get(), isCorrect);
     }
 
     public Card createCard(String clue, String answer, Long deckId, Long userId) {
@@ -323,6 +329,51 @@ public class CardService {
             dcs.add(new DeckCard(c.getCardId(), userDeckId));
         }
         deckCardRepository.saveAllAndFlush(dcs);
+    }
+
+    protected void cloneCards(Long deckIdOld, Long deckIdNew, Long userId) {
+        Deck deckOld = deckRepository.getReferenceById(deckIdOld);
+        Deck deckNew = deckRepository.getReferenceById(deckIdNew);
+
+        // can only copy cards from a public deck, to a deck owned by the current user
+        if (!deckOld.isPublic() 
+            || !authenticationService.isOwnerOrAdmin(deckNew.getOwnedBy())
+            || !authenticationService.isOwnerOrAdmin(userId)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        List<Card> cards = cardRepository.getAllCardsInDeck(deckIdOld);
+        List<Card> newCards = new ArrayList<Card>();
+        for (Card c: cards){
+            Card n = new Card();
+            n.setAnswer(c.getAnswer());
+            n.setClue(c.getClue());
+            n.setOwnedBy(userId);
+            n.setDeckId(deckIdNew);
+            newCards.add(n);
+        }
+        cardRepository.saveAllAndFlush(newCards);
+    }
+
+    protected void deleteCards(Long deckId){
+        Deck deck = deckRepository.getReferenceById(deckId);
+        if (!authenticationService.isOwnerOrAdmin(deck.getOwnedBy())
+            | deck.isPublic()){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        List<Card> cards = cardRepository.getAllCardsInDeck(deckId);
+        cardRepository.deleteAll(cards);
+    }
+
+    protected void deleteDeckCards(Long userDeckId){
+        UserDeck ud = userDeckRepository.getReferenceById(userDeckId);
+        if (!authenticationService.isOwnerOrAdmin(ud.getOwnedBy())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        List<DeckCard> dcs = deckCardRepository.findByUserDeckId(userDeckId);
+        deckCardRepository.deleteAll(dcs);
     }
 
 }

@@ -7,6 +7,7 @@ import com.flashcards.model.UserDeck;
 import com.flashcards.model.DTO.CardDTO;
 import com.flashcards.repository.AppUserRepository;
 import com.flashcards.repository.CardRepository;
+import com.flashcards.repository.DailyStatsRepository;
 import com.flashcards.repository.DeckCardRepository;
 import com.flashcards.repository.DeckRepository;
 import com.flashcards.repository.UserDeckRepository;
@@ -36,9 +37,10 @@ class CardServiceTest {
     private DeckCardRepository deckCardRepository;
     private UserDeckRepository userDeckRepository;
     private AppUserRepository appUserRepository;
+    private DailyStatsRepository dailyStatsRepository;
     private AuthenticationService authService;
     private CardService cardService;
-
+    private StatisticService statisticService;
 
     @AfterEach
     public void clearSecurityContext() {
@@ -52,9 +54,11 @@ class CardServiceTest {
         deckCardRepository = mock(DeckCardRepository.class);
         userDeckRepository = mock(UserDeckRepository.class);
         appUserRepository = mock(AppUserRepository.class);
+        dailyStatsRepository = mock(DailyStatsRepository.class);
         authService = new AuthenticationService(appUserRepository, null, null);
+        statisticService = new StatisticService(dailyStatsRepository, authService);
         cardService = new CardService(cardRepository, deckCardRepository, deckRepository,
-                userDeckRepository, authService);
+                userDeckRepository, authService, statisticService);
     }
 
     private void setupAuthenticationTest() {

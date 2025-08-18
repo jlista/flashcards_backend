@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import com.flashcards.repository.AppUserRepository;
 import com.flashcards.repository.CardRepository;
+import com.flashcards.repository.DailyStatsRepository;
 import com.flashcards.repository.DeckCardRepository;
 import com.flashcards.repository.DeckRepository;
 import com.flashcards.repository.UserDeckRepository;
@@ -26,6 +27,8 @@ public class FlashcardsBackendApplication {
   AppUserRepository appUserRepository;
   @Autowired
   UserDeckRepository userDeckRepository;
+  @Autowired
+  DailyStatsRepository dailyStatsRepository;
 }
 
 

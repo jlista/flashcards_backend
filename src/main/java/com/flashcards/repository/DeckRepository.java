@@ -14,6 +14,11 @@ public interface DeckRepository extends JpaRepository<Deck, Long> {
             + "WHERE d.deckId = :id")
     List<Long> getAssociatedUserDeckIds(@Param("id") Long deckId);
 
+    @Query("Select new com.flashcards.model.DTO.DeckDTO(d.deckId, d.deckName, d.description, d.isPublic) "
+            +"from Deck d join UserDeck u on d.deckId = u.deckId "
+            +"where u.userDeckId = :userDeckId")
+    DeckDTO getAssociatedDeck(@Param("userDeckId") Long userDeckId);
+
     @Query("Select new com.flashcards.model.DTO.DeckDTO(deckId, deckName, description, isPublic) " 
           +"from Deck d "
           +"where d.isPublic = true")
@@ -27,4 +32,9 @@ public interface DeckRepository extends JpaRepository<Deck, Long> {
           +"on u.deckId = d.deckId "
           +"where u.ownedBy = :userId)" )
     List<DeckDTO> getPublicDecksNotOwned(@Param("userId") Long userId);
+
+    @Query("Select d.isPublic "
+            + "FROM Deck d JOIN UserDeck u on d.deckId = u.deckId "
+            + "WHERE u.userDeckId = :userDeckId")
+    boolean isUserDeckAssociatedWithPublicDeck(@Param("userDeckId") Long userDeckId);
 }

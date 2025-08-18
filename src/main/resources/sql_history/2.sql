@@ -7,3 +7,5 @@ CREATE TABLE daily_stats (
 	num_incorrect INT default 0,
 	PRIMARY KEY (user_id, date_stamp)
 );
+
+ALTER TABLE deck add column is_enabled boolean default true;
