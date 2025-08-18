@@ -52,6 +52,13 @@ public class DeckController {
         deckService.setDeckPublic(deckId);
     }
 
+    @PostMapping("/clone")
+    public void cloneDeck(@RequestParam Long deckId, @RequestParam Long userId, @RequestBody DeckDTO requestBody){
+        String deckName = requestBody.getName();
+        String description = requestBody.getDescription();
+        deckCardService.cloneDeckAndCards(deckId, userId, deckName, description); 
+    }
+
     @GetMapping("/public")
     public List<DeckDTO> getPublicDecks(@RequestParam Long userId){
         return deckService.getPublicDecksNotOwned(userId);

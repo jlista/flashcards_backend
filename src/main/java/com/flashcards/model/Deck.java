@@ -35,6 +35,8 @@ public class Deck {
     private Long ownedBy;
     @Column(name = "is_public", nullable = false, unique = false)
     private boolean isPublic;
+    @Column(name = "cloned_from", nullable = true, unique = false)
+    private Long clonedFrom;
     @Column(name = "created", nullable = false, unique = false)
     @CreationTimestamp
     private Timestamp created;

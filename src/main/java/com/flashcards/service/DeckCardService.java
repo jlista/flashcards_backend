@@ -1,6 +1,7 @@
 package com.flashcards.service;
 
 import org.springframework.stereotype.Service;
+import com.flashcards.model.Deck;
 import com.flashcards.model.UserDeck;
 
 @Service
@@ -15,7 +16,14 @@ public class DeckCardService {
     }
     
     public void copyDeckAndCards(Long deckId, Long userId){
-        UserDeck ud = deckService.copyDeckForUser(deckId, userId);
-        cardService.copyCardsToUserDeck(deckId, ud.getUserDeckId());
+        UserDeck new_user_deck = deckService.copyDeckForUser(deckId, userId);
+        cardService.copyCardsToUserDeck(deckId, new_user_deck.getUserDeckId());
+    }
+
+    public void cloneDeckAndCards(Long deckId, Long userId, String name, String desc){
+        Deck new_deck = deckService.cloneDeck(deckId, userId, name, desc);
+        cardService.cloneCards(deckId, new_deck.getDeckId(), userId);
+        UserDeck new_user_deck = deckService.copyDeckForUser(new_deck.getDeckId(), userId);
+        cardService.copyCardsToUserDeck(new_deck.getDeckId(), new_user_deck.getUserDeckId());
     }
 }

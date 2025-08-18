@@ -1,6 +1,6 @@
 package com.flashcards.model.DTO;
 
-import java.time.LocalTime;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DailyStatsDTO {
-    private LocalTime dateStamp;
+    private LocalDate dateStamp;
     private int numCorrect;
     private int numIncorrect;
 }

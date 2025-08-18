@@ -1,6 +1,7 @@
 package com.flashcards.service;
 
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -118,10 +119,13 @@ public class DeckService {
      * @return the UserDeck that was created
      */
     protected UserDeck copyDeckForUser(Long deckId, Long userId){
-        Deck deck = deckRepository.getReferenceById(deckId);
-        
-        // only allow copying a deck if it is public or owned by the current user
-        if (!deck.isPublic() && !authenticationService.isOwnerOrAdmin(deck.getOwnedBy())) {
+        if (!authenticationService.isOwnerOrAdmin(userId)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+        Optional<UserDeckDTO> u = userDeckRepository.findByUserAndDeck(userId, deckId);
+
+        // only allow copying a deck if it is not already copied by the current user
+        if (u.isPresent()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
         }
 
@@ -130,6 +134,29 @@ public class DeckService {
         ud.setOwnedBy(userId);
         
         return userDeckRepository.save(ud);
+    }
+
+    protected Deck cloneDeck(Long deckId, Long userId, String name, String desc){
+        if (!authenticationService.isOwnerOrAdmin(userId)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+        Deck deck = deckRepository.getReferenceById(deckId);
+        Optional<UserDeckDTO> u = userDeckRepository.findByUserAndDeck(userId, deckId);
+
+        // make sure the deck is public and owned by the current user
+        if (!(deck.isPublic() && u.isPresent())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        Deck clone = new Deck();
+        clone.setDeckName(name);
+        clone.setDescription(desc);
+        clone.setOwnedBy(userId);
+        clone.setPublic(false);
+        clone.setClonedFrom(deckId);
+        deckRepository.save(clone);
+        return clone;
+
     }
 
     public List<DeckDTO> getPublicDecks(){

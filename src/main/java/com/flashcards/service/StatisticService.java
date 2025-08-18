@@ -47,8 +47,9 @@ public class StatisticService {
         }
 
         int totalAnswered = totalCorrect + totalIncorrect;
-        float percentCorrect = totalCorrect / totalAnswered;
+        float percentCorrect = 100 * totalCorrect / totalAnswered;
 
+        stats.setUserId(userId);
         stats.setPercentCorrect(percentCorrect);
         stats.setTotalAnswered(totalAnswered);
         stats.setTotalCorrect(totalCorrect);

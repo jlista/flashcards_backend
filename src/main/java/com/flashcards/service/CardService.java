@@ -331,4 +331,28 @@ public class CardService {
         deckCardRepository.saveAllAndFlush(dcs);
     }
 
+    protected void cloneCards(Long deckIdOld, Long deckIdNew, Long userId) {
+        Deck deckOld = deckRepository.getReferenceById(deckIdOld);
+        Deck deckNew = deckRepository.getReferenceById(deckIdNew);
+
+        // can only copy cards from a public deck, to a deck owned by the current user
+        if (!deckOld.isPublic() 
+            || !authenticationService.isOwnerOrAdmin(deckNew.getOwnedBy())
+            || !authenticationService.isOwnerOrAdmin(userId)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        List<Card> cards = cardRepository.getAllCardsInDeck(deckIdOld);
+        List<Card> newCards = new ArrayList<Card>();
+        for (Card c: cards){
+            Card n = new Card();
+            n.setAnswer(c.getAnswer());
+            n.setClue(c.getClue());
+            n.setOwnedBy(userId);
+            n.setDeckId(deckIdNew);
+            newCards.add(n);
+        }
+        cardRepository.saveAllAndFlush(newCards);
+    }
+
 }
