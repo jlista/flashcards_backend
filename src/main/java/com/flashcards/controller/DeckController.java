@@ -63,5 +63,10 @@ public class DeckController {
     public List<DeckDTO> getPublicDecks(@RequestParam Long userId){
         return deckService.getPublicDecksNotOwned(userId);
     }
+
+    @DeleteMapping()
+    public void deleteUserDeck(@RequestParam Long userDeckId){
+        deckCardService.deleteDeck(userDeckId);
+    }
 }
 

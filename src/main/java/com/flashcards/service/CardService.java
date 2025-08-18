@@ -355,4 +355,25 @@ public class CardService {
         cardRepository.saveAllAndFlush(newCards);
     }
 
+    protected void deleteCards(Long deckId){
+        Deck deck = deckRepository.getReferenceById(deckId);
+        if (!authenticationService.isOwnerOrAdmin(deck.getOwnedBy())
+            | deck.isPublic()){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        List<Card> cards = cardRepository.getAllCardsInDeck(deckId);
+        cardRepository.deleteAll(cards);
+    }
+
+    protected void deleteDeckCards(Long userDeckId){
+        UserDeck ud = userDeckRepository.getReferenceById(userDeckId);
+        if (!authenticationService.isOwnerOrAdmin(ud.getOwnedBy())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        List<DeckCard> dcs = deckCardRepository.findByUserDeckId(userDeckId);
+        deckCardRepository.deleteAll(dcs);
+    }
+
 }

@@ -3,6 +3,7 @@ package com.flashcards.service;
 import org.springframework.stereotype.Service;
 import com.flashcards.model.Deck;
 import com.flashcards.model.UserDeck;
+import com.flashcards.model.DTO.DeckDTO;
 
 @Service
 public class DeckCardService {
@@ -25,5 +26,18 @@ public class DeckCardService {
         cardService.cloneCards(deckId, new_deck.getDeckId(), userId);
         UserDeck new_user_deck = deckService.copyDeckForUser(new_deck.getDeckId(), userId);
         cardService.copyCardsToUserDeck(new_deck.getDeckId(), new_user_deck.getUserDeckId());
+    }
+
+    public void deleteDeck(Long userDeckId){
+        
+        DeckDTO d = deckService.getAssociatedDeck(userDeckId);
+        
+        cardService.deleteDeckCards(userDeckId);
+        deckService.deleteUserDeck(userDeckId);
+
+        if (!d.isPublic()){
+            cardService.deleteCards(d.getDeckId());
+            deckService.deleteDeck(d.getDeckId());
+        }
     }
 }

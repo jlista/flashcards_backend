@@ -31,6 +31,10 @@ public class DeckService {
         this.authenticationService = authenticationService;
     }
 
+    public DeckDTO getAssociatedDeck(Long userDeckId){
+        return deckRepository.getAssociatedDeck(userDeckId);
+    }
+
     /**
      * Get all UserDecks associated with a given user ID
      * @param userId
@@ -169,5 +173,22 @@ public class DeckService {
         }
 
         return deckRepository.getPublicDecksNotOwned(userId);
+    }
+
+    protected void deleteDeck(Long deckId){
+        Deck deck = deckRepository.getReferenceById(deckId);
+        if (!authenticationService.isOwnerOrAdmin(deck.getOwnedBy())
+            | deck.isPublic()){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+        deckRepository.delete(deck);
+    }
+
+    protected void deleteUserDeck(Long userDeckId){
+        UserDeck ud = userDeckRepository.getReferenceById(userDeckId);
+        if (!authenticationService.isOwnerOrAdmin(ud.getOwnedBy())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+        userDeckRepository.delete(ud);
     }
 }

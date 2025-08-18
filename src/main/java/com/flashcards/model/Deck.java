@@ -40,4 +40,6 @@ public class Deck {
     @Column(name = "created", nullable = false, unique = false)
     @CreationTimestamp
     private Timestamp created;
+    @Column(name = "is_enabled", nullable = false, unique = false)
+    private boolean enabled = true;
 }
