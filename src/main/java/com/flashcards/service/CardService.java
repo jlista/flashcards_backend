@@ -37,17 +37,14 @@ public class CardService {
     private final UserDeckRepository userDeckRepository;
     private final AuthenticationService authenticationService;
 
-    private final StatisticService statisticService;
 
     public CardService(CardRepository cardRepository, DeckCardRepository deckCardRepository,
-            DeckRepository deckRepository, UserDeckRepository userDeckRepository, AuthenticationService authenticationService,
-            StatisticService statisticService) {
+            DeckRepository deckRepository, UserDeckRepository userDeckRepository, AuthenticationService authenticationService) {
         this.cardRepository = cardRepository;
         this.deckCardRepository = deckCardRepository;
         this.deckRepository = deckRepository;
         this.userDeckRepository = userDeckRepository;
         this.authenticationService = authenticationService;
-        this.statisticService = statisticService;
     }
 
     public List<CardDTO> getAllCardsInUserDeck(Long userDeckId) {
@@ -163,7 +160,7 @@ public class CardService {
         return Optional.of(card);
     }
 
-    public void updateCardStreak(Long cardId, long userDeckId, Boolean isCorrect) {
+    public Long updateCardStreak(Long cardId, long userDeckId, Boolean isCorrect) {
         /**
          * Updates the streak and mastery level of a card based on whether or not the user answered
          * correctly
@@ -193,8 +190,7 @@ public class CardService {
             card.setLastCorrect(now);
         }
         deckCardRepository.save(card);
-
-        statisticService.updateDailyStats(owner.get(), isCorrect);
+        return owner.get();
     }
 
     public Card createCard(String clue, String answer, Long deckId, Long userId) {
@@ -376,4 +372,11 @@ public class CardService {
         deckCardRepository.deleteAll(dcs);
     }
 
+    protected List<DeckCard> getDeckCardsByUser(Long userId){
+        if (!authenticationService.isOwnerOrAdmin(userId)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        return deckCardRepository.findByUserId(userId);
+    }
 }

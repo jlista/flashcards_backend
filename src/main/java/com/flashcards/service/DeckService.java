@@ -41,6 +41,9 @@ public class DeckService {
      * @return
      */
     public List<UserDeckDTO> getUserDecks(Long userId) {
+        if (!authenticationService.isOwnerOrAdmin(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
         return userDeckRepository.findByOwnedBy(userId);
     }
 

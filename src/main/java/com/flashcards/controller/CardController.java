@@ -4,8 +4,8 @@ import com.flashcards.model.Card;
 import com.flashcards.model.DTO.CardDTO;
 import com.flashcards.model.DTO.CardMigrationDTO;
 import com.flashcards.model.DTO.CardCreationDTO;
+import com.flashcards.service.AnswerCardOrchestrationService;
 import com.flashcards.service.CardService;
-import com.flashcards.service.DeckService;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,9 +18,12 @@ import org.springframework.web.bind.annotation.*;
 public class CardController {
 
     private final CardService cardService;
+    private final AnswerCardOrchestrationService answerService;
 
-    public CardController(CardService cardService, DeckService deckService) {
+    public CardController(CardService cardService, 
+                          AnswerCardOrchestrationService answerService) {
         this.cardService = cardService;
+        this.answerService = answerService;
     }
 
     @GetMapping()
@@ -90,7 +93,7 @@ public class CardController {
     @PutMapping("/answer")
     public void answerCard(@RequestParam Long cardId, @RequestParam Long userDeckId,
             @RequestBody Boolean isCorrect) {
-        cardService.updateCardStreak(cardId, userDeckId, isCorrect);
+        answerService.updateCardStreak(cardId, userDeckId, isCorrect);
     }
 
     @PutMapping("/reset")
