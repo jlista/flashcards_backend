@@ -16,10 +16,14 @@ public class StatisticService {
 
     private final DailyStatsRepository dailyStatsRepository;
     private final AuthenticationService authenticationService;
+    private final DeckCardService deckCardService;
 
-    public StatisticService(DailyStatsRepository dailyStatsRepository, AuthenticationService authenticationService){
+    public StatisticService(DailyStatsRepository dailyStatsRepository, 
+                            AuthenticationService authenticationService,
+                            DeckCardService deckCardService){
         this.dailyStatsRepository = dailyStatsRepository;
         this.authenticationService = authenticationService;
+        this.deckCardService = deckCardService;
     }
     
     /**
@@ -54,6 +58,7 @@ public class StatisticService {
         stats.setTotalAnswered(totalAnswered);
         stats.setTotalCorrect(totalCorrect);
         stats.setTotalIncorrect(totalIncorrect);
+        stats.setDeckStats(deckCardService.getConsolidatedDeckCardStats(userId));
 
         return stats;
     }

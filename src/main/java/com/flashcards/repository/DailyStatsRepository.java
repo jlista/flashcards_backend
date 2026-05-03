@@ -19,6 +19,7 @@ public interface DailyStatsRepository extends JpaRepository<DailyStats, Long> {
 
     @Query("SELECT new com.flashcards.model.DTO.DailyStatsDTO(s.dateStamp, s.numCorrect, s.numIncorrect) "
         +"FROM DailyStats s "
-        +"WHERE s.userId = :userId")
+        +"WHERE s.userId = :userId "
+        +"ORDER BY s.dateStamp ASC ")
     public List<DailyStatsDTO> findByUser(@Param("userId") Long userId);
 }

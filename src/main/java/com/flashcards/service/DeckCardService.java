@@ -1,9 +1,13 @@
 package com.flashcards.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import com.flashcards.model.Deck;
+import com.flashcards.model.DeckCard;
 import com.flashcards.model.UserDeck;
 import com.flashcards.model.DTO.DeckDTO;
+import com.flashcards.model.DTO.DeckStatsDTO;
+import com.flashcards.model.DTO.UserDeckDTO;
 
 @Service
 public class DeckCardService {
@@ -39,5 +43,19 @@ public class DeckCardService {
             cardService.deleteCards(d.getDeckId());
             deckService.deleteDeck(d.getDeckId());
         }
+    }
+
+    public DeckStatsDTO getConsolidatedDeckCardStats(Long userId){
+        List<UserDeckDTO> uds = deckService.getUserDecks(userId);
+        List<DeckCard> dcs = cardService.getDeckCardsByUser(userId);
+        DeckStatsDTO stats = new DeckStatsDTO();
+        stats.setNumDecks(uds.size());
+        stats.setNumCards(dcs.size());
+        int[] cardsByMastery = new int[5];
+        for (DeckCard card: dcs){
+            cardsByMastery[card.getMasteryLevel()]++;
+        }
+        stats.setCardsByMastery(cardsByMastery);
+        return stats;
     }
 }

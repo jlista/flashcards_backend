@@ -3,11 +3,9 @@ package com.flashcards.service;
 import com.flashcards.model.AppUser;
 import com.flashcards.model.Card;
 import com.flashcards.model.DeckCard;
-import com.flashcards.model.UserDeck;
 import com.flashcards.model.DTO.CardDTO;
 import com.flashcards.repository.AppUserRepository;
 import com.flashcards.repository.CardRepository;
-import com.flashcards.repository.DailyStatsRepository;
 import com.flashcards.repository.DeckCardRepository;
 import com.flashcards.repository.DeckRepository;
 import com.flashcards.repository.UserDeckRepository;
@@ -22,7 +20,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -37,10 +34,8 @@ class CardServiceTest {
     private DeckCardRepository deckCardRepository;
     private UserDeckRepository userDeckRepository;
     private AppUserRepository appUserRepository;
-    private DailyStatsRepository dailyStatsRepository;
     private AuthenticationService authService;
     private CardService cardService;
-    private StatisticService statisticService;
 
     @AfterEach
     public void clearSecurityContext() {
@@ -54,11 +49,9 @@ class CardServiceTest {
         deckCardRepository = mock(DeckCardRepository.class);
         userDeckRepository = mock(UserDeckRepository.class);
         appUserRepository = mock(AppUserRepository.class);
-        dailyStatsRepository = mock(DailyStatsRepository.class);
         authService = new AuthenticationService(appUserRepository, null, null);
-        statisticService = new StatisticService(dailyStatsRepository, authService);
         cardService = new CardService(cardRepository, deckCardRepository, deckRepository,
-                userDeckRepository, authService, statisticService);
+                userDeckRepository, authService);
     }
 
     private void setupAuthenticationTest() {

@@ -17,5 +17,6 @@ public class StatisticsDTO {
     private int totalIncorrect;
     private float percentCorrect;
     private List<DailyStatsDTO> dailyStats;
+    private DeckStatsDTO deckStats;
 }
 
